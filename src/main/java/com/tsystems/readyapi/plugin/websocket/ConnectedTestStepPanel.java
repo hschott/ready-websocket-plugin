@@ -40,7 +40,7 @@ public class ConnectedTestStepPanel<T extends ConnectedTestStep> extends ModelIt
     class ConfigureConnectionsAction extends AbstractAction {
         public ConfigureConnectionsAction() {
             putValue(Action.SHORT_DESCRIPTION, "Configure Websocket Connections of the Project");
-            putValue(Action.SMALL_ICON, UISupport.createImageIcon("com/eviware/soapui/resources/images/edit16px.png"));
+            putValue(Action.SMALL_ICON, UISupport.createImageIcon("com/eviware/soapui/resources/images/options.png"));
         }
 
         @Override

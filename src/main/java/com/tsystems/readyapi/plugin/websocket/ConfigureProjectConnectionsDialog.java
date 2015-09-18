@@ -463,7 +463,7 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
     private class EditAction extends AbstractAction {
         public EditAction() {
             putValue(Action.SHORT_DESCRIPTION, "Configure Selected Connection");
-            putValue(Action.SMALL_ICON, UISupport.createImageIcon("com/eviware/soapui/resources/images/edit16px.png"));
+            putValue(Action.SMALL_ICON, UISupport.createImageIcon("com/eviware/soapui/resources/images/options.png"));
         }
 
         @Override
