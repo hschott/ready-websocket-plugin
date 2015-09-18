@@ -8,20 +8,25 @@ public class XmlObjectBuilder {
     private XmlObject config;
     private XmlCursor cursor;
 
-    public XmlObjectBuilder(XmlObject config) {
-        this.config = config;
-        cursor = config.newCursor();
-        cursor.toNextToken();
-    }
-
     public XmlObjectBuilder() {
         this(XmlObject.Factory.newInstance());
         cursor = config.newCursor();
         cursor.toNextToken();
     }
 
-    public XmlObjectBuilder add(String name, String value) {
-        cursor.insertElementWithText(name, value);
+    public XmlObjectBuilder(XmlObject config) {
+        this.config = config;
+        cursor = config.newCursor();
+        cursor.toNextToken();
+    }
+
+    public XmlObjectBuilder add(String name, boolean value) {
+        cursor.insertElementWithText(name, String.valueOf(value));
+        return this;
+    }
+
+    public XmlObjectBuilder add(String name, float value) {
+        cursor.insertElementWithText(name, String.valueOf(value));
         return this;
     }
 
@@ -35,9 +40,14 @@ public class XmlObjectBuilder {
         return this;
     }
 
-    public XmlObjectBuilder add(String name, float value) {
-        cursor.insertElementWithText(name, String.valueOf(value));
+    public XmlObjectBuilder add(String name, String value) {
+        cursor.insertElementWithText(name, value);
         return this;
+    }
+
+    public void add(String name, String[] values) {
+        for (String value : values)
+            add(name, value);
     }
 
     public XmlObjectBuilder addSection(String sectionName, XmlObject section) {
@@ -64,17 +74,6 @@ public class XmlObjectBuilder {
     public XmlObject finish() {
         cursor.dispose();
         return config;
-    }
-
-    public XmlObjectBuilder add(String name, boolean value) {
-        cursor.insertElementWithText(name, String.valueOf(value));
-        return this;
-    }
-
-    public void add(String name, String[] values) {
-        for (String value : values) {
-            add(name, value);
-        }
     }
 
 }

@@ -8,11 +8,11 @@ import com.jgoodies.binding.value.ValueModel;
 
 public class ReadOnlyValueModel<SrcType> extends AbstractValueModel {
 
-    public interface Converter<SrcType> {
-        Object convert(SrcType srcValue);
-    }
+    /** serialVersionUID description. */
+    private static final long serialVersionUID = -3683204797906806867L;
 
     private ValueModel source;
+
     private Converter<SrcType> converter;
 
     public ReadOnlyValueModel(ValueModel source, Converter<SrcType> converter) {
@@ -28,6 +28,10 @@ public class ReadOnlyValueModel<SrcType> extends AbstractValueModel {
 
     @Override
     public void setValue(Object newValue) {
+    }
+
+    public interface Converter<SrcType> {
+        Object convert(SrcType srcValue);
     }
 
     private final class SubjectValueChangeHandler implements PropertyChangeListener {

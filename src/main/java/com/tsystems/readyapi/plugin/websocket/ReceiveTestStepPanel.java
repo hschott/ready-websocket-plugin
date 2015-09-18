@@ -45,6 +45,9 @@ import com.jgoodies.binding.adapter.Bindings;
 public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep> implements AssertionsListener,
         ExecutionListener {
 
+    /** serialVersionUID description. */
+    private static final long serialVersionUID = 398715768048748118L;
+    private final static String LOG_TAB_TITLE = "Test Step Log (%d)";
     private JComponentInspector<JComponent> assertionInspector;
     private JInspectorPanel inspectorPanel;
     private AssertionsPanel assertionsPanel;
@@ -52,12 +55,11 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
     private JTabbedPane jsonEditor;
     private JComponent jsonTreeEditor;
     private JTabbedPane xmlEditor;
+
     private JComponent xmlTreeEditor;
-
     private JComponentInspector<JComponent> logInspector;
-    private JLogList logArea;
 
-    private final static String LOG_TAB_TITLE = "Test Step Log (%d)";
+    private JLogList logArea;
 
     public ReceiveTestStepPanel(ReceiveTestStep modelItem) {
         super(modelItem);
@@ -66,32 +68,47 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
         modelItem.addExecutionListener(this);
     }
 
-    private void buildUI() {
+    @Override
+    public void afterExecution(ExecutableTestStep testStep, ExecutableTestStepResult executionResult) {
+        logArea.addLine(DateUtil.formatFull(new Date(executionResult.getTimeStamp())) + " - "
+                + executionResult.getOutcome());
+    }
 
-        JComponent mainPanel = buildMainPanel();
-        inspectorPanel = JInspectorPanelFactory.build(mainPanel);
+    @Override
+    public void assertionAdded(TestAssertion assertion) {
+        assertionListChanged();
+    }
 
-        assertionsPanel = buildAssertionsPanel();
+    private void assertionListChanged() {
+        assertionInspector.setTitle(String.format("Assertions (%d)", getModelItem().getAssertionCount()));
+    }
 
-        assertionInspector = new JComponentInspector<JComponent>(assertionsPanel, "Assertions ("
-                + getModelItem().getAssertionCount() + ")", "Assertions for this Message", true);
+    @Override
+    public void assertionMoved(TestAssertion assertion, int ix, int offset) {
+        assertionListChanged();
+    }
 
-        inspectorPanel.addInspector(assertionInspector);
+    @Override
+    public void assertionRemoved(TestAssertion assertion) {
+        assertionListChanged();
+    }
 
-        logInspector = new JComponentInspector<JComponent>(buildLogPanel(), String.format(LOG_TAB_TITLE, 0),
-                "Log of the test step executions", true);
-        inspectorPanel.addInspector(logInspector);
+    private AssertionsPanel buildAssertionsPanel() {
+        return new AssertionsPanel(getModelItem());
+    }
 
-        inspectorPanel.setDefaultDividerLocation(0.6F);
-        inspectorPanel.setCurrentInspector("Assertions");
+    protected JComponent buildLogPanel() {
+        logArea = new JLogList("Test Step Log");
 
-        updateStatusIcon();
+        logArea.getLogList().getModel().addListDataListener(new ListDataChangeListener() {
 
-        add(inspectorPanel.getComponent());
+            @Override
+            public void dataChanged(ListModel model) {
+                logInspector.setTitle(String.format(LOG_TAB_TITLE, model.getSize()));
+            }
+        });
 
-        propertyChange(new PropertyChangeEvent(getModelItem(), "receivedMessage", null, getModelItem()
-                .getReceivedMessage()));
-
+        return logArea;
     }
 
     private JComponent buildMainPanel() {
@@ -185,42 +202,49 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
         return toolBar;
     }
 
-    private AssertionsPanel buildAssertionsPanel() {
-        return new AssertionsPanel(getModelItem());
+    private void buildUI() {
+
+        JComponent mainPanel = buildMainPanel();
+        inspectorPanel = JInspectorPanelFactory.build(mainPanel);
+
+        assertionsPanel = buildAssertionsPanel();
+
+        assertionInspector = new JComponentInspector<JComponent>(assertionsPanel, "Assertions ("
+                + getModelItem().getAssertionCount() + ")", "Assertions for this Message", true);
+
+        inspectorPanel.addInspector(assertionInspector);
+
+        logInspector = new JComponentInspector<JComponent>(buildLogPanel(), String.format(LOG_TAB_TITLE, 0),
+                "Log of the test step executions", true);
+        inspectorPanel.addInspector(logInspector);
+
+        inspectorPanel.setDefaultDividerLocation(0.6F);
+        inspectorPanel.setCurrentInspector("Assertions");
+
+        updateStatusIcon();
+
+        add(inspectorPanel.getComponent());
+
+        propertyChange(new PropertyChangeEvent(getModelItem(), "receivedMessage", null, getModelItem()
+                .getReceivedMessage()));
+
     }
 
-    protected JComponent buildLogPanel() {
-        logArea = new JLogList("Test Step Log");
-
-        logArea.getLogList().getModel().addListDataListener(new ListDataChangeListener() {
-
-            @Override
-            public void dataChanged(ListModel model) {
-                logInspector.setTitle(String.format(LOG_TAB_TITLE, model.getSize()));
-            }
-        });
-
-        return logArea;
-    }
-
-    private void updateStatusIcon() {
-        Assertable.AssertionStatus status = getModelItem().getAssertionStatus();
-        switch (status) {
-        case FAILED: {
-            assertionInspector.setIcon(UISupport.createImageIcon("com/smartbear/assets/failed_assertion.png"));
-            inspectorPanel.activate(assertionInspector);
-            break;
+    @Override
+    public boolean onClose(boolean canCancel) {
+        if (super.onClose(canCancel)) {
+            getModelItem().removeExecutionListener(this);
+            getModelItem().removeAssertionsListener(this);
+            assertionsPanel.release();
+            inspectorPanel.release();
+            if (jsonTreeEditor != null)
+                Utils.releaseTreeEditor(jsonTreeEditor);
+            if (xmlTreeEditor != null)
+                Utils.releaseTreeEditor(xmlTreeEditor);
+            return true;
         }
-        case UNKNOWN: {
-            assertionInspector.setIcon(UISupport.createImageIcon("com/smartbear/assets/unknown_assertion.png"));
-            break;
-        }
-        case VALID: {
-            assertionInspector.setIcon(UISupport.createImageIcon("com/smartbear/assets/valid_assertion.png"));
-            inspectorPanel.deactivate();
-            break;
-        }
-        }
+
+        return false;
     }
 
     @Override
@@ -251,49 +275,23 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
 
     }
 
-    @Override
-    public boolean onClose(boolean canCancel) {
-        if (super.onClose(canCancel)) {
-            getModelItem().removeExecutionListener(this);
-            getModelItem().removeAssertionsListener(this);
-            assertionsPanel.release();
-            inspectorPanel.release();
-            if (jsonTreeEditor != null)
-                Utils.releaseTreeEditor(jsonTreeEditor);
-            if (xmlTreeEditor != null)
-                Utils.releaseTreeEditor(xmlTreeEditor);
-            return true;
+    private void updateStatusIcon() {
+        Assertable.AssertionStatus status = getModelItem().getAssertionStatus();
+        switch (status) {
+        case FAILED: {
+            assertionInspector.setIcon(UISupport.createImageIcon("com/smartbear/assets/failed_assertion.png"));
+            inspectorPanel.activate(assertionInspector);
+            break;
         }
-
-        return false;
-    }
-
-    private void assertionListChanged() {
-        assertionInspector.setTitle(String.format("Assertions (%d)", getModelItem().getAssertionCount()));
-    }
-
-    @Override
-    public void assertionAdded(TestAssertion assertion) {
-        assertionListChanged();
-    }
-
-    @Override
-    public void assertionRemoved(TestAssertion assertion) {
-        assertionListChanged();
-    }
-
-    @Override
-    public void assertionMoved(TestAssertion assertion, int ix, int offset) {
-        assertionListChanged();
-    }
-
-    @Override
-    public void afterExecution(ExecutableTestStep testStep, ExecutableTestStepResult executionResult) {
-        logArea.addLine(DateUtil.formatFull(new Date(executionResult.getTimeStamp())) + " - "
-                + executionResult.getOutcome());
-    }
-
-    private void logMessage(long time, String message) {
-        logArea.addLine(DateUtil.formatFull(new Date(time)) + " - " + message);
+        case UNKNOWN: {
+            assertionInspector.setIcon(UISupport.createImageIcon("com/smartbear/assets/unknown_assertion.png"));
+            break;
+        }
+        case VALID: {
+            assertionInspector.setIcon(UISupport.createImageIcon("com/smartbear/assets/valid_assertion.png"));
+            inspectorPanel.deactivate();
+            break;
+        }
+        }
     }
 }

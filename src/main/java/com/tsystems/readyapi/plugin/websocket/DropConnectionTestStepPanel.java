@@ -9,6 +9,9 @@ import com.jgoodies.binding.PresentationModel;
 
 public class DropConnectionTestStepPanel extends ConnectedTestStepPanel<DropConnectionTestStep> {
 
+    /** serialVersionUID description. */
+    private static final long serialVersionUID = -8477527042685376996L;
+
     public DropConnectionTestStepPanel(DropConnectionTestStep modelItem) {
         super(modelItem);
         buildUI();

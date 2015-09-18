@@ -1,6 +1,5 @@
 package com.tsystems.readyapi.plugin.websocket;
 
-import java.io.IOException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -34,28 +33,10 @@ public class Client {
         this.upgradeRequest = upgradeRequest;
     }
 
-    public boolean isConnected() {
-        Session session;
-        if ((session = this.session.get()) != null)
-            return session.isOpen();
-        else
-            return false;
-    }
-
-    public boolean isFaulty() {
-        return throwable.get() != null;
-    }
-
-    public boolean isAvailable() {
+    public void cancel() {
         Future future;
         if ((future = this.future.get()) != null)
-            return future.isDone();
-        else
-            return true;
-    }
-
-    public Throwable getThrowable() {
-        return throwable.get();
+            future.cancel(true);
     }
 
     public void connect() {
@@ -70,65 +51,7 @@ public class Client {
         }
     }
 
-    public void sendMessage(Message<?> message) {
-        Session session;
-        if ((session = this.session.get()) != null) {
-            if (message instanceof Message.TextMessage) {
-                Message.TextMessage text = (Message.TextMessage) message;
-                future.set(session.getRemote().sendStringByFuture(text.getPayload()));
-            }
-            if (message instanceof Message.BinaryMessage) {
-                Message.BinaryMessage binary = (Message.BinaryMessage) message;
-                future.set(session.getRemote().sendBytesByFuture(binary.getPayload()));
-            }
-        }
-    }
-
-    @OnWebSocketConnect
-    public void onWebSocketConnect(Session session) {
-        LOGGER.info("WebSocketConnect success="
-                + (session.getUpgradeResponse() != null ? session.getUpgradeResponse().isSuccess() : false)
-                + " accepted protocol="
-                + (session.getUpgradeResponse() != null ? session.getUpgradeResponse().getAcceptedSubProtocol() : ""));
-        this.session.set(session);
-    }
-
-    @OnWebSocketMessage
-    public void onWebSocketText(String payload) {
-        Message.TextMessage message = new Message.TextMessage(payload);
-        messageQueue.addMessage(message);
-    }
-
-    @OnWebSocketMessage
-    public void onWebSocketBinary(byte[] payload, int offset, int length) {
-        Message.BinaryMessage message = new Message.BinaryMessage(payload, offset, length);
-        messageQueue.addMessage(message);
-    }
-
-    @OnWebSocketFrame
-    public void onWebSocketFrame(Frame frame) {
-        LOGGER.debug("WebSocketFrame type=" + frame.getType() + " payload=" + frame.getPayload());
-    }
-
-    @OnWebSocketClose
-    public void onWebSocketClose(int statusCode, String reason) {
-        LOGGER.info("WebSocketClose statusCode=" + statusCode + " reason=" + reason);
-        messageQueue = new MessageQueue();
-        session.set(null);
-        throwable.set(null);
-    }
-
-    @OnWebSocketError
-    public void onWebSocketError(Session session, Throwable cause) {
-        LOGGER.error("WebSocketError", cause);
-        throwable.set(cause);
-    }
-
-    public MessageQueue getMessageQueue() {
-        return messageQueue;
-    }
-
-    public void disconnect(boolean harshDisconnect) throws IOException {
+    public void disconnect(boolean harshDisconnect) throws Exception {
         Session session;
         if ((session = this.session.get()) != null)
             if (!harshDisconnect)
@@ -150,9 +73,85 @@ public class Client {
         }
     }
 
-    public void cancel() {
+    public MessageQueue getMessageQueue() {
+        return messageQueue;
+    }
+
+    public Throwable getThrowable() {
+        return throwable.get();
+    }
+
+    public boolean isAvailable() {
         Future future;
         if ((future = this.future.get()) != null)
-            future.cancel(true);
+            return future.isDone();
+        else
+            return true;
+    }
+
+    public boolean isConnected() {
+        Session session;
+        if ((session = this.session.get()) != null)
+            return session.isOpen();
+        else
+            return false;
+    }
+
+    public boolean isFaulty() {
+        return throwable.get() != null;
+    }
+
+    @OnWebSocketMessage
+    public void onWebSocketBinary(byte[] payload, int offset, int length) {
+        Message.BinaryMessage message = new Message.BinaryMessage(payload, offset, length);
+        messageQueue.addMessage(message);
+    }
+
+    @OnWebSocketClose
+    public void onWebSocketClose(int statusCode, String reason) {
+        LOGGER.info("WebSocketClose statusCode=" + statusCode + " reason=" + reason);
+        messageQueue = new MessageQueue();
+        session.set(null);
+        throwable.set(null);
+    }
+
+    @OnWebSocketConnect
+    public void onWebSocketConnect(Session session) {
+        LOGGER.info("WebSocketConnect success="
+                + (session.getUpgradeResponse() != null ? session.getUpgradeResponse().isSuccess() : false)
+                + " accepted protocol="
+                + (session.getUpgradeResponse() != null ? session.getUpgradeResponse().getAcceptedSubProtocol() : ""));
+        this.session.set(session);
+    }
+
+    @OnWebSocketError
+    public void onWebSocketError(Session session, Throwable cause) {
+        LOGGER.error("WebSocketError", cause);
+        throwable.set(cause);
+    }
+
+    @OnWebSocketFrame
+    public void onWebSocketFrame(Frame frame) {
+        LOGGER.debug("WebSocketFrame type=" + frame.getType() + " payload=" + frame.getPayload());
+    }
+
+    @OnWebSocketMessage
+    public void onWebSocketText(String payload) {
+        Message.TextMessage message = new Message.TextMessage(payload);
+        messageQueue.addMessage(message);
+    }
+
+    public void sendMessage(Message<?> message) {
+        Session session;
+        if ((session = this.session.get()) != null) {
+            if (message instanceof Message.TextMessage) {
+                Message.TextMessage text = (Message.TextMessage) message;
+                future.set(session.getRemote().sendStringByFuture(text.getPayload()));
+            }
+            if (message instanceof Message.BinaryMessage) {
+                Message.BinaryMessage binary = (Message.BinaryMessage) message;
+                future.set(session.getRemote().sendBytesByFuture(binary.getPayload()));
+            }
+        }
     }
 }

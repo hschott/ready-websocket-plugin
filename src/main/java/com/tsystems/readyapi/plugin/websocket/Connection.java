@@ -30,10 +30,18 @@ public class Connection implements PropertyChangeNotifier {
     private static final String PASSWORD_FOR_ENCODING = "{CB012CCB-6D9C-4c3d-8A82-06B54D546512}";
     public static final String ENCRYPTION_METHOD = "des3";
 
+    public final static String NAME_BEAN_PROP = "name";
+    public final static String LOGIN_BEAN_PROP = "login";
+    public final static String PASSWORD_BEAN_PROP = "password";
+    public final static String SUB_PROTOCOLS_BEAN_PROP = "subprotocols";
     private String name;
+
     private String originalServerUri;
+
     private String login;
+
     private String password;
+
     private String subprotocols;
 
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
@@ -45,6 +53,61 @@ public class Connection implements PropertyChangeNotifier {
         this();
         this.name = name;
         setParams(params);
+    }
+
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        try {
+            propertyChangeSupport.addPropertyChangeListener(listener);
+        } catch (Throwable t) {
+            LOGGER.error(t);
+        }
+    }
+
+    @Override
+    public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+        try {
+            propertyChangeSupport.addPropertyChangeListener(propertyName, listener);
+        } catch (Throwable t) {
+            LOGGER.error(t);
+        }
+    }
+
+    public ExpandedConnectionParams expand(PropertyExpansionContext context) {
+        ExpandedConnectionParams result = new ExpandedConnectionParams();
+        result.setServerUri(context.expand(getServerUri()));
+        result.subprotocols = context.expand(getSubprotocols());
+        result.setCredentials(context.expand(getLogin()), context.expand(getPassword()));
+
+        return result;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public ConnectionParams getParams() {
+        return new ConnectionParams(getServerUri(), getLogin(), getPassword(), getSubprotocols());
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getServerUri() {
+        return originalServerUri;
+    }
+
+    public String getSubprotocols() {
+        return subprotocols;
+    }
+
+    public boolean hasCredentials() {
+        return login != null && !"".equals(login);
     }
 
     public void load(XmlObject xml) {
@@ -65,6 +128,33 @@ public class Connection implements PropertyChangeNotifier {
         }
 
         subprotocols = reader.readString(SUB_PROTOCOLS_SETTING_NAME, null);
+    }
+
+    public void notifyPropertyChanged(String name, Object oldValue, Object newValue) {
+        try {
+            if (!Objects.equals(oldValue, newValue))
+                propertyChangeSupport.firePropertyChange(name, oldValue, newValue);
+        } catch (Throwable t) {
+            LOGGER.error(t);
+        }
+    }
+
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        try {
+            propertyChangeSupport.removePropertyChangeListener(listener);
+        } catch (Throwable t) {
+            LOGGER.error(t);
+        }
+    }
+
+    @Override
+    public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+        try {
+            propertyChangeSupport.removePropertyChangeListener(propertyName, listener);
+        } catch (Throwable t) {
+            LOGGER.error(t);
+        }
     }
 
     public XmlObject save() {
@@ -89,8 +179,44 @@ public class Connection implements PropertyChangeNotifier {
         return builder.finish();
     }
 
-    public String getServerUri() {
-        return originalServerUri;
+    public void setCredentials(String login, String password) {
+        if (login == null || login.length() == 0) {
+            setLogin(login);
+            setPassword(null);
+        } else {
+            setLogin(login);
+            setPassword(password);
+        }
+    }
+
+    public void setLogin(String newValue) {
+        String old = getLogin();
+        if (!Utils.areStringsEqual(old, newValue, false, true)) {
+            login = newValue;
+            notifyPropertyChanged(LOGIN_BEAN_PROP, old, newValue);
+        }
+    }
+
+    public void setName(String newName) {
+        String oldName = name;
+        if (!Utils.areStringsEqual(oldName, newName, ARE_NAMES_CASE_INSENSITIVE, true)) {
+            name = newName;
+            notifyPropertyChanged(NAME_BEAN_PROP, oldName, newName);
+        }
+    }
+
+    public void setParams(ConnectionParams params) {
+        setServerUri(params.serverUri);
+        setCredentials(params.login, params.password);
+        setSubprotocols(params.subprotocols);
+    }
+
+    public void setPassword(String newValue) {
+        String old = getPassword();
+        if (!Utils.areStringsEqual(old, newValue, false, true)) {
+            password = newValue;
+            notifyPropertyChanged(PASSWORD_BEAN_PROP, old, newValue);
+        }
     }
 
     public void setServerUri(String serverUri) {
@@ -102,137 +228,11 @@ public class Connection implements PropertyChangeNotifier {
             notifyPropertyChanged("serverUri", oldServerUri, originalServerUri);
     }
 
-    public final static String NAME_BEAN_PROP = "name";
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String newName) {
-        String oldName = name;
-        if (!Utils.areStringsEqual(oldName, newName, ARE_NAMES_CASE_INSENSITIVE, true)) {
-            name = newName;
-            notifyPropertyChanged(NAME_BEAN_PROP, oldName, newName);
-        }
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public final static String LOGIN_BEAN_PROP = "login";
-
-    public void setLogin(String newValue) {
-        String old = getLogin();
-        if (!Utils.areStringsEqual(old, newValue, false, true)) {
-            login = newValue;
-            notifyPropertyChanged(LOGIN_BEAN_PROP, old, newValue);
-        }
-    }
-
-    public final static String PASSWORD_BEAN_PROP = "password";
-
-    public void setPassword(String newValue) {
-        String old = getPassword();
-        if (!Utils.areStringsEqual(old, newValue, false, true)) {
-            password = newValue;
-            notifyPropertyChanged(PASSWORD_BEAN_PROP, old, newValue);
-        }
-    }
-
-    public boolean hasCredentials() {
-        return login != null && !"".equals(login);
-    }
-
-    public void setCredentials(String login, String password) {
-        if (login == null || login.length() == 0) {
-            setLogin(login);
-            setPassword(null);
-        } else {
-            setLogin(login);
-            setPassword(password);
-        }
-    }
-
-    public final static String SUB_PROTOCOLS_BEAN_PROP = "subprotocols";
-
-    public String getSubprotocols() {
-        return subprotocols;
-    }
-
     public void setSubprotocols(String newValue) {
         String old = getSubprotocols();
         if (!Utils.areStringsEqual(old, newValue, false, true)) {
             subprotocols = newValue;
             notifyPropertyChanged(SUB_PROTOCOLS_BEAN_PROP, old, newValue);
-        }
-    }
-
-    public ConnectionParams getParams() {
-        return new ConnectionParams(getServerUri(), getLogin(), getPassword(), getSubprotocols());
-    }
-
-    public void setParams(ConnectionParams params) {
-        setServerUri(params.serverUri);
-        setCredentials(params.login, params.password);
-        setSubprotocols(params.subprotocols);
-    }
-
-    public ExpandedConnectionParams expand(PropertyExpansionContext context) {
-        ExpandedConnectionParams result = new ExpandedConnectionParams();
-        result.setServerUri(context.expand(getServerUri()));
-        result.subprotocols = context.expand(getSubprotocols());
-        result.setCredentials(context.expand(getLogin()), context.expand(getPassword()));
-
-        return result;
-    }
-
-    @Override
-    public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        try {
-            propertyChangeSupport.addPropertyChangeListener(propertyName, listener);
-        } catch (Throwable t) {
-            LOGGER.error(t);
-        }
-    }
-
-    @Override
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        try {
-            propertyChangeSupport.addPropertyChangeListener(listener);
-        } catch (Throwable t) {
-            LOGGER.error(t);
-        }
-    }
-
-    @Override
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        try {
-            propertyChangeSupport.removePropertyChangeListener(listener);
-        } catch (Throwable t) {
-            LOGGER.error(t);
-        }
-    }
-
-    @Override
-    public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        try {
-            propertyChangeSupport.removePropertyChangeListener(propertyName, listener);
-        } catch (Throwable t) {
-            LOGGER.error(t);
-        }
-    }
-
-    public void notifyPropertyChanged(String name, Object oldValue, Object newValue) {
-        try {
-            if (!Objects.equals(oldValue, newValue))
-                propertyChangeSupport.firePropertyChange(name, oldValue, newValue);
-        } catch (Throwable t) {
-            LOGGER.error(t);
         }
     }
 }

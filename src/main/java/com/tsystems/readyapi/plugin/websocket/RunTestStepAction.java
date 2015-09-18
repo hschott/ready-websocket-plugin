@@ -12,6 +12,8 @@ import com.eviware.soapui.impl.wsdl.WsdlSubmitContext;
 import com.eviware.soapui.support.UISupport;
 
 public class RunTestStepAction extends AbstractAction implements Runnable, CancellationToken {
+    /** serialVersionUID description. */
+    private static final long serialVersionUID = -293379556639527450L;
     private ExecutableTestStep testStep;
     private Future future;
     private StopTestStepAction stopAction;
@@ -40,8 +42,34 @@ public class RunTestStepAction extends AbstractAction implements Runnable, Cance
         future = SoapUI.getThreadPool().submit(this);
     }
 
+    public void cancel() {
+        if (!isExecutionInProgress)
+            return;
+        isCancelled = true;
+        if (future.cancel(false))
+            onFinish();
+    }
+
+    @Override
+    public String cancellationReason() {
+        return null;
+    }
+
+    @Override
+    public boolean cancelled() {
+        return isCancelled;
+    }
+
     public StopTestStepAction getCorrespondingStopAction() {
         return stopAction;
+    }
+
+    private void onFinish() {
+        isExecutionInProgress = false;
+        isCancelled = false;
+        future = null;
+        setEnabled(true);
+        stopAction.setEnabled(false);
     }
 
     @Override
@@ -56,31 +84,5 @@ public class RunTestStepAction extends AbstractAction implements Runnable, Cance
                 }
             });
         }
-    }
-
-    @Override
-    public boolean cancelled() {
-        return isCancelled;
-    }
-
-    @Override
-    public String cancellationReason() {
-        return null;
-    }
-
-    public void cancel() {
-        if (!isExecutionInProgress)
-            return;
-        isCancelled = true;
-        if (future.cancel(false))
-            onFinish();
-    }
-
-    private void onFinish() {
-        isExecutionInProgress = false;
-        isCancelled = false;
-        future = null;
-        setEnabled(true);
-        stopAction.setEnabled(false);
     }
 }

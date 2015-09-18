@@ -18,56 +18,6 @@ public class ConnectionsGrabber implements ProjectListener, WorkspaceListener {
     }
 
     @Override
-    public void interfaceAdded(Interface anInterface) {
-
-    }
-
-    @Override
-    public void interfaceRemoved(Interface anInterface) {
-
-    }
-
-    @Override
-    public void interfaceUpdated(Interface anInterface) {
-
-    }
-
-    @Override
-    public void testSuiteAdded(TestSuite testSuite) {
-
-    }
-
-    @Override
-    public void testSuiteRemoved(TestSuite testSuite) {
-
-    }
-
-    @Override
-    public void testSuiteMoved(TestSuite testSuite, int i, int i1) {
-
-    }
-
-    @Override
-    public void mockServiceAdded(MockService mockService) {
-
-    }
-
-    @Override
-    public void mockServiceRemoved(MockService mockService) {
-
-    }
-
-    @Override
-    public void loadUITestAdded(LoadTestModelItem loadUiTest) {
-
-    }
-
-    @Override
-    public void loadUITestRemoved(LoadTestModelItem loadUiTest) {
-
-    }
-
-    @Override
     public void afterLoad(Project project) {
         ConnectionsManager.onProjectLoaded(project);
     }
@@ -88,12 +38,47 @@ public class ConnectionsGrabber implements ProjectListener, WorkspaceListener {
     }
 
     @Override
+    public void environmentRenamed(Environment environment, String s, String s1) {
+
+    }
+
+    @Override
     public void environmentSwitched(Environment environment) {
 
     }
 
     @Override
-    public void environmentRenamed(Environment environment, String s, String s1) {
+    public void interfaceAdded(Interface anInterface) {
+
+    }
+
+    @Override
+    public void interfaceRemoved(Interface anInterface) {
+
+    }
+
+    @Override
+    public void interfaceUpdated(Interface anInterface) {
+
+    }
+
+    @Override
+    public void loadUITestAdded(LoadTestModelItem loadUiTest) {
+
+    }
+
+    @Override
+    public void loadUITestRemoved(LoadTestModelItem loadUiTest) {
+
+    }
+
+    @Override
+    public void mockServiceAdded(MockService mockService) {
+
+    }
+
+    @Override
+    public void mockServiceRemoved(MockService mockService) {
 
     }
 
@@ -103,17 +88,7 @@ public class ConnectionsGrabber implements ProjectListener, WorkspaceListener {
     }
 
     @Override
-    public void projectRemoved(Project project) {
-
-    }
-
-    @Override
     public void projectChanged(Project project) {
-
-    }
-
-    @Override
-    public void projectOpened(Project project) {
 
     }
 
@@ -123,12 +98,37 @@ public class ConnectionsGrabber implements ProjectListener, WorkspaceListener {
     }
 
     @Override
-    public void workspaceSwitching(Workspace workspace) {
+    public void projectOpened(Project project) {
+
+    }
+
+    @Override
+    public void projectRemoved(Project project) {
+
+    }
+
+    @Override
+    public void testSuiteAdded(TestSuite testSuite) {
+
+    }
+
+    @Override
+    public void testSuiteMoved(TestSuite testSuite, int i, int i1) {
+
+    }
+
+    @Override
+    public void testSuiteRemoved(TestSuite testSuite) {
 
     }
 
     @Override
     public void workspaceSwitched(Workspace workspace) {
+
+    }
+
+    @Override
+    public void workspaceSwitching(Workspace workspace) {
 
     }
 }

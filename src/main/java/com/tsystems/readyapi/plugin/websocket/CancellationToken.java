@@ -1,7 +1,7 @@
 package com.tsystems.readyapi.plugin.websocket;
 
 public interface CancellationToken {
-    boolean cancelled();
-
     String cancellationReason();
+
+    boolean cancelled();
 }

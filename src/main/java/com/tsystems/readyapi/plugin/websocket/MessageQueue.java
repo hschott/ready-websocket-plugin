@@ -2,11 +2,6 @@ package com.tsystems.readyapi.plugin.websocket;
 
 public class MessageQueue {
 
-    private static class Node {
-        public Message<?> data;
-        public Node next = null;
-    }
-
     private Node first = null, last = null, cur = null, prev = null;
 
     public MessageQueue() {
@@ -24,13 +19,6 @@ public class MessageQueue {
                 last = last.next;
                 last.data = item;
             }
-        }
-    }
-
-    public void setCurrentMessageToHead() {
-        synchronized (this) {
-            cur = null;
-            prev = null;
         }
     }
 
@@ -71,5 +59,17 @@ public class MessageQueue {
                 cur = prev.next;
             }
         }
+    }
+
+    public void setCurrentMessageToHead() {
+        synchronized (this) {
+            cur = null;
+            prev = null;
+        }
+    }
+
+    private static class Node {
+        public Message<?> data;
+        public Node next = null;
     }
 }

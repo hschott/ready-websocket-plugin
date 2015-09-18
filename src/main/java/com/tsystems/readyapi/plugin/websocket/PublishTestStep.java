@@ -32,10 +32,10 @@ public class PublishTestStep extends ConnectedTestStep {
     private final static Logger log = Logger.getLogger(PluginConfig.LOGGER_NAME);
     public final static PublishedMessageType DEFAULT_MESSAGE_TYPE = PublishedMessageType.Json;
 
-    private PublishedMessageType messageKind = DEFAULT_MESSAGE_TYPE;
-    private String message;
-
     private static boolean actionGroupAdded = false;
+    private PublishedMessageType messageKind = DEFAULT_MESSAGE_TYPE;
+
+    private String message;
 
     private ImageIcon disabledStepIcon;
     private ImageIcon unknownStepIcon;
@@ -91,25 +91,6 @@ public class PublishTestStep extends ConnectedTestStep {
         if (!forLoadTest)
             initIcons();
         setIcon(unknownStepIcon);
-        TestMonitor testMonitor = SoapUI.getTestMonitor();
-        if (testMonitor != null)
-            testMonitor.addTestMonitorListener(this);
-    }
-
-    protected void initIcons() {
-        unknownStepIcon = UISupport.createImageIcon("com/smartbear/assets/unknown_publish_step.png");
-        disabledStepIcon = UISupport.createImageIcon("com/smartbear/assets/disabled_publish_step.png");
-
-        iconAnimator = new IconAnimator<PublishTestStep>(this, "com/smartbear/assets/unknown_publish_step.png",
-                "com/smartbear/assets/publish_step.png", 5);
-    }
-
-    @Override
-    public void release() {
-        TestMonitor testMonitor = SoapUI.getTestMonitor();
-        if (testMonitor != null)
-            testMonitor.removeTestMonitorListener(this);
-        super.release();
     }
 
     private boolean checkProperties(WsdlTestStepResult result, PublishedMessageType messageTypeToCheck,
@@ -185,6 +166,17 @@ public class PublishTestStep extends ConnectedTestStep {
         }
     }
 
+    @Override
+    public ExecutableTestStepResult execute(PropertyExpansionContext runContext, CancellationToken cancellationToken) {
+        updateState();
+        try {
+            return doExecute(runContext, cancellationToken);
+        } finally {
+            cleanAfterExecution(runContext);
+        }
+
+    }
+
     private String formOutcome(WsdlTestStepResult executionResult) {
         switch (executionResult.getStatus()) {
         case CANCELED:
@@ -201,8 +193,48 @@ public class PublishTestStep extends ConnectedTestStep {
 
     }
 
+    public String getMessage() {
+        return message;
+    }
+
     public PublishedMessageType getMessageKind() {
         return messageKind;
+    }
+
+    protected void initIcons() {
+        unknownStepIcon = UISupport.createImageIcon("com/smartbear/assets/unknown_publish_step.png");
+        disabledStepIcon = UISupport.createImageIcon("com/smartbear/assets/disabled_publish_step.png");
+
+        iconAnimator = new IconAnimator<PublishTestStep>(this, "com/smartbear/assets/unknown_publish_step.png",
+                "com/smartbear/assets/publish_step.png", 5);
+    }
+
+    @Override
+    protected void readData(XmlObjectConfigurationReader reader) {
+        super.readData(reader);
+        try {
+            messageKind = PublishedMessageType.valueOf(reader.readString(MESSAGE_KIND_SETTING_NAME,
+                    DEFAULT_MESSAGE_TYPE.name()));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            messageKind = DEFAULT_MESSAGE_TYPE;
+        }
+        message = reader.readString(MESSAGE_SETTING_NAME, "");
+    }
+
+    public void setMessage(String value) {
+        try {
+            switch (messageKind) {
+            case IntegerValue:
+                Integer.parseInt(value);
+                break;
+            case LongValue:
+                Long.parseLong(value);
+                break;
+            }
+        } catch (NumberFormatException e) {
+            return;
+        }
+        setProperty("message", MESSAGE_PROP_NAME, value);
     }
 
     public void setMessageKind(PublishedMessageType newValue) {
@@ -236,57 +268,6 @@ public class PublishTestStep extends ConnectedTestStep {
         }
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String value) {
-        try {
-            switch (messageKind) {
-            case IntegerValue:
-                Integer.parseInt(value);
-                break;
-            case LongValue:
-                Long.parseLong(value);
-                break;
-            }
-        } catch (NumberFormatException e) {
-            return;
-        }
-        setProperty("message", MESSAGE_PROP_NAME, value);
-    }
-
-    @Override
-    public ExecutableTestStepResult execute(PropertyExpansionContext runContext, CancellationToken cancellationToken) {
-        updateState();
-        try {
-            return doExecute(runContext, cancellationToken);
-        } finally {
-            cleanAfterExecution(runContext);
-        }
-
-    }
-
-    @Override
-    protected void readData(XmlObjectConfigurationReader reader) {
-        super.readData(reader);
-        try {
-            messageKind = PublishedMessageType.valueOf(reader.readString(MESSAGE_KIND_SETTING_NAME,
-                    DEFAULT_MESSAGE_TYPE.name()));
-        } catch (IllegalArgumentException | NullPointerException e) {
-            messageKind = DEFAULT_MESSAGE_TYPE;
-        }
-        message = reader.readString(MESSAGE_SETTING_NAME, "");
-    }
-
-    @Override
-    protected void writeData(XmlObjectBuilder builder) {
-        super.writeData(builder);
-        if (messageKind != null)
-            builder.add(MESSAGE_KIND_SETTING_NAME, messageKind.name());
-        builder.add(MESSAGE_SETTING_NAME, message);
-    }
-
     @Override
     protected void updateState() {
         if (iconAnimator == null)
@@ -297,6 +278,14 @@ public class PublishTestStep extends ConnectedTestStep {
             setIcon(disabledStepIcon);
         else
             setIcon(unknownStepIcon);
+    }
+
+    @Override
+    protected void writeData(XmlObjectBuilder builder) {
+        super.writeData(builder);
+        if (messageKind != null)
+            builder.add(MESSAGE_KIND_SETTING_NAME, messageKind.name());
+        builder.add(MESSAGE_SETTING_NAME, message);
     }
 
 }

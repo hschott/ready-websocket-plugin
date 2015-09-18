@@ -3,7 +3,6 @@ package com.tsystems.readyapi.plugin.websocket;
 import static com.tsystems.readyapi.plugin.websocket.Utils.bytesToHexString;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -50,7 +49,6 @@ import com.eviware.soapui.model.testsuite.TestCaseRunner;
 import com.eviware.soapui.model.testsuite.TestStep;
 import com.eviware.soapui.model.testsuite.TestStepResult;
 import com.eviware.soapui.monitor.TestMonitor;
-import com.eviware.soapui.monitor.TestMonitorListener;
 import com.eviware.soapui.plugins.auto.PluginTestStep;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
@@ -62,51 +60,26 @@ import com.google.common.base.Charsets;
 @PluginTestStep(typeName = "WebsocketReceiveTestStep", name = "Receive Websocket Message",
         description = "Waits for a Websocket message of a specific topic.",
         iconPath = "com/smartbear/assets/receive_step.png")
-public class ReceiveTestStep extends ConnectedTestStep implements Assertable, PropertyChangeListener,
-        TestMonitorListener, ExecutableTestStep {
+public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     private final static Logger LOGGER = Logger.getLogger(PluginConfig.LOGGER_NAME);
 
-    enum MessageType {
-        Text("Text (UTF-8)"), BinaryData("Raw binary data"), IntegerNumber("Integer number"), FloatNumber(
-                "Float number");
-        private String title;
-
-        @Override
-        public String toString() {
-            return title;
-        }
-
-        MessageType(String title) {
-            this.title = title;
-        }
-
-        public static MessageType fromString(String s) {
-            if (s == null)
-                return null;
-            for (MessageType m : MessageType.values())
-                if (m.toString().equals(s))
-                    return m;
-            return null;
-
-        }
-    }
-
     private final static String EXPECTED_MESSAGE_TYPE_PROP_NAME = "ExpectedMessageType";
+
     private final static String RECEIVED_MESSAGE_PROP_NAME = "ReceivedMessage";
-
     private final static String ASSERTION_SECTION = "assertion";
-    private final static Logger log = Logger.getLogger(PluginConfig.LOGGER_NAME);
 
+    private final static Logger log = Logger.getLogger(PluginConfig.LOGGER_NAME);
     private static boolean actionGroupAdded = false;
 
     private MessageType expectedMessageType = MessageType.Text;
 
     private String receivedMessage = null;
+
     private AssertionsSupport assertionsSupport;
     private AssertionStatus assertionStatus = AssertionStatus.UNKNOWN;
     private ArrayList<TestAssertionConfig> assertionConfigs = new ArrayList<TestAssertionConfig>();
-
     private ImageIcon validStepIcon;
+
     private ImageIcon failedStepIcon;
     private ImageIcon disabledStepIcon;
     private ImageIcon unknownStepIcon;
@@ -148,88 +121,45 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable, Pr
 
         if (!forLoadTest)
             initIcons();
-        TestMonitor testMonitor = SoapUI.getTestMonitor();
-        if (testMonitor != null)
-            testMonitor.addTestMonitorListener(this);
+
         updateState();
     }
 
-    protected void initIcons() {
-        validStepIcon = UISupport.createImageIcon("com/smartbear/assets/valid_receive_step.png");
-        failedStepIcon = UISupport.createImageIcon("com/smartbear/assets/invalid_receive_step.png");
-        unknownStepIcon = UISupport.createImageIcon("com/smartbear/assets/unknown_receive_step.png");
-        disabledStepIcon = UISupport.createImageIcon("com/smartbear/assets/disabled_receive_step.png");
-
-        iconAnimator = new IconAnimator<ReceiveTestStep>(this, "com/smartbear/assets/receive_step_base.png",
-                "com/smartbear/assets/receive_step.png", 5);
-    }
-
-    private void initAssertions(TestStepConfig testStepData) {
-        if (testStepData != null && testStepData.getConfig() != null) {
-            XmlObject config = testStepData.getConfig();
-            XmlObject[] assertionsSections = config.selectPath("$this/" + ASSERTION_SECTION);
-            for (XmlObject assertionSection : assertionsSections) {
-                TestAssertionConfig assertionConfig;
-                try {
-                    assertionConfig = TestAssertionConfig.Factory.parse(assertionSection.toString());
-                } catch (XmlException e) {
-                    LOGGER.error(e);
-                    continue;
-                }
-                assertionConfigs.add(assertionConfig);
-            }
-        }
-        assertionsSupport = new AssertionsSupport(this, new AssertableConfigImpl());
-    }
-
     @Override
-    public void setIcon(ImageIcon newIcon) {
-        if (iconAnimator != null && newIcon == iconAnimator.getBaseIcon())
-            return;
-        super.setIcon(newIcon);
-    }
+    public TestAssertion addAssertion(String selection) {
 
-    @Override
-    public void release() {
-        TestMonitor testMonitor = SoapUI.getTestMonitor();
-        if (testMonitor != null)
-            testMonitor.removeTestMonitorListener(this);
-        super.release();
-    }
-
-    @Override
-    protected void readData(XmlObjectConfigurationReader reader) {
-        super.readData(reader);
         try {
-            expectedMessageType = MessageType.valueOf(reader.readString(EXPECTED_MESSAGE_TYPE_PROP_NAME,
-                    MessageType.Text.toString()));
-        } catch (IllegalArgumentException | NullPointerException e) {
-            expectedMessageType = MessageType.Text;
+            WsdlMessageAssertion assertion = assertionsSupport.addWsdlAssertion(selection);
+            if (assertion == null)
+                return null;
+
+            if (receivedMessage != null) {
+                applyAssertion(assertion);
+                updateState();
+            }
+
+            return assertion;
+        } catch (Exception e) {
+            LOGGER.error(e);
+            throw e;
         }
     }
 
     @Override
-    protected void writeData(XmlObjectBuilder builder) {
-        super.writeData(builder);
-        builder.add(EXPECTED_MESSAGE_TYPE_PROP_NAME, expectedMessageType.name());
-        for (TestAssertionConfig assertionConfig : assertionConfigs)
-            builder.addSection(ASSERTION_SECTION, assertionConfig);
+    public void addAssertionsListener(AssertionsListener listener) {
+        assertionsSupport.addAssertionsListener(listener);
     }
 
-    public MessageType getExpectedMessageType() {
-        return expectedMessageType;
+    private void applyAssertion(WsdlMessageAssertion assertion) {
+        assertion.assertProperty(this, RECEIVED_MESSAGE_PROP_NAME, new MessageExchangeImpl(), new WsdlTestRunContext(
+                this));
     }
 
-    public void setExpectedMessageType(MessageType value) {
-        setProperty("expectedMessageType", null, value);
-    }
-
-    public String getReceivedMessage() {
-        return receivedMessage;
-    }
-
-    public void setReceivedMessage(String value) {
-        setProperty("receivedMessage", RECEIVED_MESSAGE_PROP_NAME, value);
+    private void assertReceivedMessage() {
+        if (getReceivedMessage() != null)
+            for (WsdlMessageAssertion assertion : assertionsSupport.getAssertionList())
+                applyAssertion(assertion);
+        updateState();
     }
 
     private String bytesToString(byte[] buf, int startPos, Charset charset) {
@@ -245,134 +175,9 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable, Pr
         }
     }
 
-    private void onInvalidPayload(byte[] payload, WsdlTestStepResult errors) {
-        if (payload == null || payload.length == 0) {
-            setReceivedMessage(null);
-            errors.addMessage(String.format(
-                    "Unable to extract a content of \"%s\" type from the message, because its payload is empty.",
-                    expectedMessageType));
-            return;
-        }
-        String text;
-        String actualFormat = "hexadecimal digits sequence";
-        if (payload.length >= 3 && payload[0] == (byte) 0xef && payload[1] == (byte) 0xbb && payload[2] == (byte) 0xbf) {
-            text = bytesToString(payload, 3, Charsets.UTF_8);
-            if (text == null)
-                text = bytesToHexString(payload);
-            else
-                actualFormat = "UTF-8 text";
-        } else if (payload.length >= 2
-                && ((payload[1] & 0xff) * 256 + (payload[0] & 0xff) == 0xfffe || (payload[1] & 0xff) * 256
-                        + (payload[0] & 0xff) == 0xfeff)) {
-            text = bytesToString(payload, 2, Charsets.UTF_16);
-            if (text == null)
-                text = bytesToHexString(payload);
-            else
-                actualFormat = "UTF-16 text";
-        } else
-            text = bytesToHexString(payload);
-        setReceivedMessage(text);
-        errors.addMessage(String.format(
-                "Unable to extract a content of \"%s\" type from the message. It is stored as %s.",
-                expectedMessageType, actualFormat));
-    }
-
-    private boolean storeMessage(Message<?> message, WsdlTestStepResult errors) {
-        if (message instanceof Message.BinaryMessage) {
-
-            byte[] payload = new byte[0];
-            Message.BinaryMessage binary = (Message.BinaryMessage) message;
-            payload = binary.getPayload().array();
-
-            switch (expectedMessageType) {
-            case IntegerNumber:
-                switch (payload.length) {
-                case 1:
-                    setReceivedMessage(String.valueOf(payload[0]));
-                    return true;
-                case 2:
-                    setReceivedMessage(String.valueOf((payload[0] & 0xff) + (payload[1] << 8)));
-                    return true;
-                case 4:
-                    int ir = 0;
-                    for (int i = 0; i < 4; ++i)
-                        ir += (payload[i] & 0xff) << 8 * i;
-                    setReceivedMessage(String.valueOf(ir));
-                    return true;
-                case 8:
-                    long lr = 0;
-                    for (int i = 0; i < 8; ++i)
-                        lr += (long) (payload[i] & 0xff) << 8 * i;
-                    setReceivedMessage(String.valueOf(lr));
-                    return true;
-                }
-
-                break;
-
-            case FloatNumber:
-                switch (payload.length) {
-                case 4:
-                    setReceivedMessage(String.valueOf(ByteBuffer.wrap(payload).getFloat()));
-                    return true;
-                case 8:
-                    setReceivedMessage(String.valueOf(ByteBuffer.wrap(payload).getDouble()));
-                    return true;
-                }
-
-            case BinaryData:
-                setReceivedMessage(bytesToHexString(payload));
-                return true;
-            }
-
-            onInvalidPayload(payload, errors);
-            return true;
-        }
-
-        if (message instanceof Message.TextMessage) {
-            Message.TextMessage text = (Message.TextMessage) message;
-            setReceivedMessage(text.getPayload());
-            return true;
-        }
-
-        return false;
-
-    }
-
-    private String[] diffOfStringSets(ArrayList<String> minuend, ArrayList<String> subtrahend) {
-        ArrayList<String> resultList = new ArrayList<String>();
-        for (String s : minuend) {
-            boolean presentsEverywhere = false;
-            for (String s2 : subtrahend)
-                if (Utils.areStringsEqual(s, s2)) {
-                    presentsEverywhere = true;
-                    break;
-                }
-            if (!presentsEverywhere)
-                resultList.add(s);
-        }
-        String[] result = new String[resultList.size()];
-        resultList.toArray(result);
-        return result;
-    }
-
     @Override
-    public ExecutableTestStepResult execute(PropertyExpansionContext runContext, CancellationToken cancellationToken) {
-        setReceivedMessage(null);
-        updateState();
-        try {
-            return doExecute(runContext, cancellationToken);
-        } finally {
-            cleanAfterExecution(runContext);
-        }
-    }
-
-    @Override
-    public void prepare(TestCaseRunner testRunner, TestCaseRunContext testRunContext) throws Exception {
-        super.prepare(testRunner, testRunContext);
-        setReceivedMessage(null);
-        for (TestAssertion assertion : assertionsSupport.getAssertionList())
-            assertion.prepare(testRunner, testRunContext);
-        updateState();
+    public TestAssertion cloneAssertion(TestAssertion source, String name) {
+        return assertionsSupport.cloneAssertion(source, name);
     }
 
     @Override
@@ -451,6 +256,16 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable, Pr
 
     }
 
+    @Override
+    public ExecutableTestStepResult execute(PropertyExpansionContext runContext, CancellationToken cancellationToken) {
+        updateState();
+        try {
+            return doExecute(runContext, cancellationToken);
+        } finally {
+            cleanAfterExecution(runContext);
+        }
+    }
+
     private String formOutcome(ExecutableTestStepResult executionResult) {
         if (executionResult.getStatus() == TestStepResult.TestStepStatus.CANCELED)
             return "CANCELED";
@@ -461,6 +276,267 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable, Pr
                 return "Error during message receiving: " + Utils.getExceptionMessage(executionResult.getError());
         } else
             return String.format("Message has been received within %d ms", executionResult.getTimeTaken());
+
+    }
+
+    @Override
+    public String getAssertableContent() {
+        return getReceivedMessage();
+    }
+
+    @Override
+    public String getAssertableContentAsXml() {
+        // XmlObject.Factory.parse(receivedMessage)
+        return getReceivedMessage();
+    }
+
+    @Override
+    public TestAssertionRegistry.AssertableType getAssertableType() {
+        return TestAssertionRegistry.AssertableType.BOTH;
+    }
+
+    @Override
+    public TestAssertion getAssertionAt(int c) {
+        return assertionsSupport.getAssertionAt(c);
+    }
+
+    @Override
+    public TestAssertion getAssertionByName(String name) {
+        return assertionsSupport.getAssertionByName(name);
+    }
+
+    @Override
+    public int getAssertionCount() {
+        return assertionsSupport.getAssertionCount();
+    }
+
+    @Override
+    public List<TestAssertion> getAssertionList() {
+        return new ArrayList<TestAssertion>(assertionsSupport.getAssertionList());
+    }
+
+    @Override
+    public Map<String, TestAssertion> getAssertions() {
+        return assertionsSupport.getAssertions();
+    }
+
+    @Override
+    public AssertionStatus getAssertionStatus() {
+        return assertionStatus;
+    }
+
+    @Override
+    public String getDefaultAssertableContent() {
+        return "";
+    }
+
+    public MessageType getExpectedMessageType() {
+        return expectedMessageType;
+    }
+
+    @Override
+    public Interface getInterface() {
+        return null;
+    }
+
+    public String getReceivedMessage() {
+        return receivedMessage;
+    }
+
+    @Override
+    public TestStep getTestStep() {
+        return this;
+    }
+
+    private void initAssertions(TestStepConfig testStepData) {
+        if (testStepData != null && testStepData.getConfig() != null) {
+            XmlObject config = testStepData.getConfig();
+            XmlObject[] assertionsSections = config.selectPath("$this/" + ASSERTION_SECTION);
+            for (XmlObject assertionSection : assertionsSections) {
+                TestAssertionConfig assertionConfig;
+                try {
+                    assertionConfig = TestAssertionConfig.Factory.parse(assertionSection.toString());
+                } catch (XmlException e) {
+                    LOGGER.error(e);
+                    continue;
+                }
+                assertionConfigs.add(assertionConfig);
+            }
+        }
+        assertionsSupport = new AssertionsSupport(this, new AssertableConfigImpl());
+    }
+
+    protected void initIcons() {
+        validStepIcon = UISupport.createImageIcon("com/smartbear/assets/valid_receive_step.png");
+        failedStepIcon = UISupport.createImageIcon("com/smartbear/assets/invalid_receive_step.png");
+        unknownStepIcon = UISupport.createImageIcon("com/smartbear/assets/unknown_receive_step.png");
+        disabledStepIcon = UISupport.createImageIcon("com/smartbear/assets/disabled_receive_step.png");
+
+        iconAnimator = new IconAnimator<ReceiveTestStep>(this, "com/smartbear/assets/receive_step_base.png",
+                "com/smartbear/assets/receive_step.png", 5);
+    }
+
+    @Override
+    public TestAssertion moveAssertion(int ix, int offset) {
+        WsdlMessageAssertion assertion = assertionsSupport.getAssertionAt(ix);
+        try {
+            return assertionsSupport.moveAssertion(ix, offset);
+        } finally {
+            assertion.release();
+            updateState();
+        }
+    }
+
+    private void onInvalidPayload(byte[] payload, WsdlTestStepResult errors) {
+        if (payload == null || payload.length == 0) {
+            setReceivedMessage(null);
+            errors.addMessage(String.format(
+                    "Unable to extract a content of \"%s\" type from the message, because its payload is empty.",
+                    expectedMessageType));
+            return;
+        }
+        String text;
+        String actualFormat = "hexadecimal digits sequence";
+        if (payload.length >= 3 && payload[0] == (byte) 0xef && payload[1] == (byte) 0xbb && payload[2] == (byte) 0xbf) {
+            text = bytesToString(payload, 3, Charsets.UTF_8);
+            if (text == null)
+                text = bytesToHexString(payload);
+            else
+                actualFormat = "UTF-8 text";
+        } else if (payload.length >= 2
+                && ((payload[1] & 0xff) * 256 + (payload[0] & 0xff) == 0xfffe || (payload[1] & 0xff) * 256
+                        + (payload[0] & 0xff) == 0xfeff)) {
+            text = bytesToString(payload, 2, Charsets.UTF_16);
+            if (text == null)
+                text = bytesToHexString(payload);
+            else
+                actualFormat = "UTF-16 text";
+        } else
+            text = bytesToHexString(payload);
+        setReceivedMessage(text);
+        errors.addMessage(String.format(
+                "Unable to extract a content of \"%s\" type from the message. It is stored as %s.",
+                expectedMessageType, actualFormat));
+    }
+
+    @Override
+    public void prepare(TestCaseRunner testRunner, TestCaseRunContext testRunContext) throws Exception {
+        super.prepare(testRunner, testRunContext);
+        setReceivedMessage(null);
+        for (TestAssertion assertion : assertionsSupport.getAssertionList())
+            assertion.prepare(testRunner, testRunContext);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent event) {
+        if (event.getPropertyName().equals(TestAssertion.CONFIGURATION_PROPERTY)
+                || event.getPropertyName().equals(TestAssertion.DISABLED_PROPERTY)) {
+            updateData();
+            assertReceivedMessage();
+        }
+
+    }
+
+    @Override
+    protected void readData(XmlObjectConfigurationReader reader) {
+        super.readData(reader);
+        try {
+            expectedMessageType = MessageType.valueOf(reader.readString(EXPECTED_MESSAGE_TYPE_PROP_NAME,
+                    MessageType.Text.toString()));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            expectedMessageType = MessageType.Text;
+        }
+    }
+
+    @Override
+    public void removeAssertion(TestAssertion assertion) {
+        try {
+            assertionsSupport.removeAssertion((WsdlMessageAssertion) assertion);
+
+        } finally {
+            ((WsdlMessageAssertion) assertion).release();
+        }
+        updateState();
+    }
+
+    @Override
+    public void removeAssertionsListener(AssertionsListener listener) {
+        assertionsSupport.removeAssertionsListener(listener);
+    }
+
+    public void setExpectedMessageType(MessageType value) {
+        setProperty("expectedMessageType", null, value);
+    }
+
+    @Override
+    public void setIcon(ImageIcon newIcon) {
+        if (iconAnimator != null && newIcon == iconAnimator.getBaseIcon())
+            return;
+        super.setIcon(newIcon);
+    }
+
+    public void setReceivedMessage(String value) {
+        setProperty("receivedMessage", RECEIVED_MESSAGE_PROP_NAME, value);
+    }
+
+    private boolean storeMessage(Message<?> message, WsdlTestStepResult errors) {
+        if (message instanceof Message.BinaryMessage) {
+
+            byte[] payload = new byte[0];
+            Message.BinaryMessage binary = (Message.BinaryMessage) message;
+            payload = binary.getPayload().array();
+
+            switch (expectedMessageType) {
+            case IntegerNumber:
+                switch (payload.length) {
+                case 1:
+                    setReceivedMessage(String.valueOf(payload[0]));
+                    return true;
+                case 2:
+                    setReceivedMessage(String.valueOf((payload[0] & 0xff) + (payload[1] << 8)));
+                    return true;
+                case 4:
+                    int ir = 0;
+                    for (int i = 0; i < 4; ++i)
+                        ir += (payload[i] & 0xff) << 8 * i;
+                    setReceivedMessage(String.valueOf(ir));
+                    return true;
+                case 8:
+                    long lr = 0;
+                    for (int i = 0; i < 8; ++i)
+                        lr += (long) (payload[i] & 0xff) << 8 * i;
+                    setReceivedMessage(String.valueOf(lr));
+                    return true;
+                }
+
+                break;
+
+            case FloatNumber:
+                switch (payload.length) {
+                case 4:
+                    setReceivedMessage(String.valueOf(ByteBuffer.wrap(payload).getFloat()));
+                    return true;
+                case 8:
+                    setReceivedMessage(String.valueOf(ByteBuffer.wrap(payload).getDouble()));
+                    return true;
+                }
+
+            case BinaryData:
+                setReceivedMessage(bytesToHexString(payload));
+                return true;
+            }
+
+            onInvalidPayload(payload, errors);
+            return true;
+        }
+
+        if (message instanceof Message.TextMessage) {
+            Message.TextMessage text = (Message.TextMessage) message;
+            setReceivedMessage(text.getPayload());
+            return true;
+        }
+
+        return false;
 
     }
 
@@ -514,144 +590,12 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable, Pr
         }
     }
 
-    private void applyAssertion(WsdlMessageAssertion assertion) {
-        assertion.assertProperty(this, RECEIVED_MESSAGE_PROP_NAME, new MessageExchangeImpl(), new WsdlTestRunContext(
-                this));
-    }
-
-    private void assertReceivedMessage() {
-        if (getReceivedMessage() != null)
-            for (WsdlMessageAssertion assertion : assertionsSupport.getAssertionList())
-                applyAssertion(assertion);
-        updateState();
-    }
-
     @Override
-    public void propertyChange(PropertyChangeEvent event) {
-        if (event.getPropertyName().equals(TestAssertion.CONFIGURATION_PROPERTY)
-                || event.getPropertyName().equals(TestAssertion.DISABLED_PROPERTY)) {
-            updateData();
-            assertReceivedMessage();
-        }
-
-    }
-
-    @Override
-    public TestAssertion addAssertion(String selection) {
-
-        try {
-            WsdlMessageAssertion assertion = assertionsSupport.addWsdlAssertion(selection);
-            if (assertion == null)
-                return null;
-
-            if (receivedMessage != null) {
-                applyAssertion(assertion);
-                updateState();
-            }
-
-            return assertion;
-        } catch (Exception e) {
-            LOGGER.error(e);
-            throw e;
-        }
-    }
-
-    @Override
-    public void addAssertionsListener(AssertionsListener listener) {
-        assertionsSupport.addAssertionsListener(listener);
-    }
-
-    @Override
-    public int getAssertionCount() {
-        return assertionsSupport.getAssertionCount();
-    }
-
-    @Override
-    public TestAssertion getAssertionAt(int c) {
-        return assertionsSupport.getAssertionAt(c);
-    }
-
-    @Override
-    public void removeAssertionsListener(AssertionsListener listener) {
-        assertionsSupport.removeAssertionsListener(listener);
-    }
-
-    @Override
-    public void removeAssertion(TestAssertion assertion) {
-        try {
-            assertionsSupport.removeAssertion((WsdlMessageAssertion) assertion);
-
-        } finally {
-            ((WsdlMessageAssertion) assertion).release();
-        }
-        updateState();
-    }
-
-    @Override
-    public AssertionStatus getAssertionStatus() {
-        return assertionStatus;
-    }
-
-    @Override
-    public String getAssertableContentAsXml() {
-        // XmlObject.Factory.parse(receivedMessage)
-        return getReceivedMessage();
-    }
-
-    @Override
-    public String getAssertableContent() {
-        return getReceivedMessage();
-    }
-
-    @Override
-    public String getDefaultAssertableContent() {
-        return "";
-    }
-
-    @Override
-    public TestAssertionRegistry.AssertableType getAssertableType() {
-        return TestAssertionRegistry.AssertableType.BOTH;
-    }
-
-    @Override
-    public List<TestAssertion> getAssertionList() {
-        return new ArrayList<TestAssertion>(assertionsSupport.getAssertionList());
-    }
-
-    @Override
-    public TestAssertion getAssertionByName(String name) {
-        return assertionsSupport.getAssertionByName(name);
-    }
-
-    @Override
-    public TestStep getTestStep() {
-        return this;
-    }
-
-    @Override
-    public Interface getInterface() {
-        return null;
-    }
-
-    @Override
-    public TestAssertion cloneAssertion(TestAssertion source, String name) {
-        return assertionsSupport.cloneAssertion(source, name);
-    }
-
-    @Override
-    public Map<String, TestAssertion> getAssertions() {
-        return assertionsSupport.getAssertions();
-    }
-
-    @Override
-    public TestAssertion moveAssertion(int ix, int offset) {
-        WsdlMessageAssertion assertion = assertionsSupport.getAssertionAt(ix);
-        try {
-            return assertionsSupport.moveAssertion(ix, offset);
-        } finally {
-            assertion.release();
-            updateState();
-        }
+    protected void writeData(XmlObjectBuilder builder) {
+        super.writeData(builder);
+        builder.add(EXPECTED_MESSAGE_TYPE_PROP_NAME, expectedMessageType.name());
+        for (TestAssertionConfig assertionConfig : assertionConfigs)
+            builder.addSection(ASSERTION_SECTION, assertionConfig);
     }
 
     private class AssertableConfigImpl implements AssertableConfig {
@@ -669,12 +613,6 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable, Pr
         }
 
         @Override
-        public void removeAssertion(int ix) {
-            assertionConfigs.remove(ix);
-            updateData();
-        }
-
-        @Override
         public TestAssertionConfig insertAssertion(TestAssertionConfig source, int ix) {
             TestAssertionConfig conf = TestAssertionConfig.Factory.newInstance();
             conf.set(source);
@@ -682,13 +620,24 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable, Pr
             updateData();
             return conf;
         }
+
+        @Override
+        public void removeAssertion(int ix) {
+            assertionConfigs.remove(ix);
+            updateData();
+        }
     }
 
     private class MessageExchangeImpl implements MessageExchange {
 
         @Override
-        public Operation getOperation() {
+        public String getEndpoint() {
             return null;
+        }
+
+        @Override
+        public String[] getMessages() {
+            return new String[0];
         }
 
         @Override
@@ -697,17 +646,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable, Pr
         }
 
         @Override
-        public long getTimestamp() {
-            return 0;
-        }
-
-        @Override
-        public long getTimeTaken() {
-            return 0;
-        }
-
-        @Override
-        public String getEndpoint() {
+        public Operation getOperation() {
             return null;
         }
 
@@ -717,58 +656,8 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable, Pr
         }
 
         @Override
-        public String getRequestContent() {
+        public String getProperty(String name) {
             return null;
-        }
-
-        @Override
-        public String getResponseContent() {
-            return null;
-        }
-
-        @Override
-        public String getRequestContentAsXml() {
-            return null;
-        }
-
-        @Override
-        public String getResponseContentAsXml() {
-            return null;
-        }
-
-        @Override
-        public StringToStringsMap getRequestHeaders() {
-            return null;
-        }
-
-        @Override
-        public StringToStringsMap getResponseHeaders() {
-            return null;
-        }
-
-        @Override
-        public Attachment[] getRequestAttachments() {
-            return new Attachment[0];
-        }
-
-        @Override
-        public Attachment[] getResponseAttachments() {
-            return new Attachment[0];
-        }
-
-        @Override
-        public String[] getMessages() {
-            return new String[0];
-        }
-
-        @Override
-        public boolean isDiscarded() {
-            return false;
-        }
-
-        @Override
-        public boolean hasRawData() {
-            return false;
         }
 
         @Override
@@ -782,13 +671,73 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable, Pr
         }
 
         @Override
+        public Attachment[] getRequestAttachments() {
+            return new Attachment[0];
+        }
+
+        @Override
         public Attachment[] getRequestAttachmentsForPart(String partName) {
+            return new Attachment[0];
+        }
+
+        @Override
+        public String getRequestContent() {
+            return null;
+        }
+
+        @Override
+        public String getRequestContentAsXml() {
+            return null;
+        }
+
+        @Override
+        public StringToStringsMap getRequestHeaders() {
+            return null;
+        }
+
+        @Override
+        public Response getResponse() {
+            return null;
+        }
+
+        @Override
+        public Attachment[] getResponseAttachments() {
             return new Attachment[0];
         }
 
         @Override
         public Attachment[] getResponseAttachmentsForPart(String partName) {
             return new Attachment[0];
+        }
+
+        @Override
+        public String getResponseContent() {
+            return null;
+        }
+
+        @Override
+        public String getResponseContentAsXml() {
+            return null;
+        }
+
+        @Override
+        public StringToStringsMap getResponseHeaders() {
+            return null;
+        }
+
+        @Override
+        public long getTimestamp() {
+            return 0;
+        }
+
+        @Override
+        public long getTimeTaken() {
+            return 0;
+        }
+
+        @Override
+        public boolean hasRawData() {
+            return false;
         }
 
         @Override
@@ -802,13 +751,33 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable, Pr
         }
 
         @Override
-        public Response getResponse() {
+        public boolean isDiscarded() {
+            return false;
+        }
+    }
+
+    enum MessageType {
+        Text("Text (UTF-8)"), BinaryData("Raw binary data"), IntegerNumber("Integer number"), FloatNumber(
+                "Float number");
+        private String title;
+
+        MessageType(String title) {
+            this.title = title;
+        }
+
+        public static MessageType fromString(String s) {
+            if (s == null)
+                return null;
+            for (MessageType m : MessageType.values())
+                if (m.toString().equals(s))
+                    return m;
             return null;
+
         }
 
         @Override
-        public String getProperty(String name) {
-            return null;
+        public String toString() {
+            return title;
         }
     }
 

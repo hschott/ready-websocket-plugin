@@ -15,11 +15,6 @@ enum PublishedMessageType {
         this.name = name;
     }
 
-    @Override
-    public String toString() {
-        return name;
-    }
-
     public static PublishedMessageType fromString(String s) {
         if (s == null)
             return null;
@@ -113,9 +108,14 @@ enum PublishedMessageType {
 
         }
         throw new IllegalArgumentException("The format of the published message is not specified or unknown."); // We
-                                                                                                                // won't
-                                                                                                                // be
-                                                                                                                // here
+        // won't
+        // be
+        // here
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 
 }

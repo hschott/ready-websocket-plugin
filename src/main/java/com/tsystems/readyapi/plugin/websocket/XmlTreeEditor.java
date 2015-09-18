@@ -6,15 +6,19 @@ import com.eviware.soapui.model.ModelItem;
 import com.eviware.soapui.support.editor.views.xml.outline.support.XmlObjectTree;
 
 public class XmlTreeEditor extends XmlObjectTree {
+    /** serialVersionUID description. */
+    private static final long serialVersionUID = -3637691290669204143L;
     private String prevValue = null;
 
     public XmlTreeEditor(boolean editable, ModelItem modelItem) {
         super(editable, modelItem);
     }
 
-    public void setText(String text) {
-        setContent(text);
-        detectChange(text);
+    private void detectChange(String newValue) {
+        if (!Utils.areStringsEqual(prevValue, newValue)) {
+            firePropertyChange("text", prevValue, newValue);
+            prevValue = newValue;
+        }
     }
 
     public String getText() {
@@ -28,11 +32,9 @@ public class XmlTreeEditor extends XmlObjectTree {
             detectChange(getText());
     }
 
-    private void detectChange(String newValue) {
-        if (!Utils.areStringsEqual(prevValue, newValue)) {
-            firePropertyChange("text", prevValue, newValue);
-            prevValue = newValue;
-        }
+    public void setText(String text) {
+        setContent(text);
+        detectChange(text);
     }
 
 }

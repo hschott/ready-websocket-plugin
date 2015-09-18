@@ -29,157 +29,21 @@ import com.jgoodies.binding.list.SelectionInList;
 
 public class ConnectedTestStepPanel<T extends ConnectedTestStep> extends ModelItemDesktopPanel<T> {
 
+    /** serialVersionUID description. */
+    private static final long serialVersionUID = 7510275395689660990L;
     private final static String NEW_CONNECTION_ITEM = "<New Connection...>";
     private JButton configureConnectionButton;
     private ConnectionsComboBoxModel connectionsModel;
 
-    public interface UIOption {
-        String getTitle();
-    }
-
-    class ConfigureConnectionsAction extends AbstractAction {
-        public ConfigureConnectionsAction() {
-            putValue(Action.SHORT_DESCRIPTION, "Configure Websocket Connections of the Project");
-            putValue(Action.SMALL_ICON, UISupport.createImageIcon("com/eviware/soapui/resources/images/options.png"));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            ConfigureProjectConnectionsDialog.showDialog(getModelItem());
-        }
-    }
-
-    static class ConnectionComboItem {
-        private Connection obj;
-
-        public ConnectionComboItem(Connection connection) {
-            obj = connection;
-        }
-
-        @Override
-        public String toString() {
-            return obj.getName();
-        }
-
-        public Connection getObject() {
-            return obj;
-        }
-
-        @Override
-        public boolean equals(Object op) {
-            if (op instanceof ConnectionComboItem)
-                return ((ConnectionComboItem) op).obj == obj;
-            else
-                return false;
-        }
-    }
-
-    static class NewConnectionComboItem extends ConnectionComboItem {
-        private final static NewConnectionComboItem instance = new NewConnectionComboItem();
-
-        public static NewConnectionComboItem getInstance() {
-            return instance;
-        }
-
-        private NewConnectionComboItem() {
-            super(null);
-        }
-
-        @Override
-        public String toString() {
-            return NEW_CONNECTION_ITEM;
-        }
-    }
-
-    class ConnectionsComboBoxModel extends AbstractListModel<ConnectionComboItem> implements
-            ComboBoxModel<ConnectionComboItem>, ConnectionsListener {
-
-        private ArrayList<ConnectionComboItem> items = new ArrayList<>();
-        private boolean connectionCreationInProgress = false;
-
-        public ConnectionsComboBoxModel() {
-            updateItems();
-        }
-
-        private void updateItems() {
-            items.clear();
-            List<Connection> list = ConnectionsManager.getAvailableConnections(getModelItem());
-            if (list != null)
-                for (Connection curParams : list)
-                    items.add(new ConnectionComboItem(curParams));
-            items.add(NewConnectionComboItem.getInstance());
-            fireContentsChanged(this, -1, -1);
-        }
-
-        @Override
-        public void setSelectedItem(Object anItem) {
-            if (anItem == null)
-                getModelItem().setConnection(null);
-            else if (anItem instanceof NewConnectionComboItem) {
-                connectionCreationInProgress = true;
-                UISupport.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        EditConnectionDialog.Result dialogResult = EditConnectionDialog
-                                .createConnection(getModelItem());
-                        connectionCreationInProgress = false;
-                        if (dialogResult == null)
-                            fireContentsChanged(ConnectionsComboBoxModel.this, -1, -1);
-                        else {
-                            Connection newConnection = new Connection(dialogResult.connectionName,
-                                    dialogResult.connectionParams);
-                            ConnectionsManager.addConnection(getModelItem(), newConnection);
-                            getModelItem().setConnection(newConnection);
-                        }
-
-                    }
-                });
-            } else {
-                Connection newParams = ((ConnectionComboItem) anItem).getObject();
-                getModelItem().setConnection(newParams);
-                fireContentsChanged(this, -1, -1);
-            }
-        }
-
-        @Override
-        public Object getSelectedItem() {
-            if (connectionCreationInProgress)
-                return NewConnectionComboItem.getInstance();
-            if (getModelItem().getConnection() == null)
-                return null;
-            return new ConnectionComboItem(getModelItem().getConnection());
-        }
-
-        @Override
-        public void connectionListChanged() {
-            updateItems();
-        }
-
-        @Override
-        public void connectionChanged(Connection connection, String propertyName, Object oldPropertyValue,
-                Object newPropertyValue) {
-            if (Utils.areStringsEqual(propertyName, "name"))
-                for (int i = 0; i < items.size(); ++i)
-                    if (items.get(i).getObject() == connection) {
-                        fireContentsChanged(connection, i, i);
-                        break;
-                    }
-        }
-
-        @Override
-        public int getSize() {
-            return items.size();
-        }
-
-        @Override
-        public ConnectionComboItem getElementAt(int index) {
-            return items.get(index);
-        }
-
-    }
-
     public ConnectedTestStepPanel(T modelItem) {
         super(modelItem);
+    }
+
+    protected void addConnectionActionsToToolbar(JXToolBar toolBar) {
+        Action configureConnectionsAction = new ConfigureConnectionsAction();
+        JButton button = UISupport.createActionButton(configureConnectionsAction,
+                configureConnectionsAction.isEnabled());
+        toolBar.add(button);
     }
 
     protected void buildConnectionSection(SimpleBindingForm form, PresentationModel<T> pm) {
@@ -233,13 +97,6 @@ public class ConnectedTestStepPanel<T extends ConnectedTestStep> extends ModelIt
 
     }
 
-    protected void addConnectionActionsToToolbar(JXToolBar toolBar) {
-        Action configureConnectionsAction = new ConfigureConnectionsAction();
-        JButton button = UISupport.createActionButton(configureConnectionsAction,
-                configureConnectionsAction.isEnabled());
-        toolBar.add(button);
-    }
-
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         super.propertyChange(evt);
@@ -255,6 +112,156 @@ public class ConnectedTestStepPanel<T extends ConnectedTestStep> extends ModelIt
         if (connectionsModel != null)
             ConnectionsManager.removeConnectionsListener(getModelItem(), connectionsModel);
         return super.release();
+    }
+
+    class ConfigureConnectionsAction extends AbstractAction {
+        /** serialVersionUID description. */
+        private static final long serialVersionUID = -3402287439060333406L;
+
+        public ConfigureConnectionsAction() {
+            putValue(Action.SHORT_DESCRIPTION, "Configure Websocket Connections of the Project");
+            putValue(Action.SMALL_ICON, UISupport.createImageIcon("com/eviware/soapui/resources/images/options.png"));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ConfigureProjectConnectionsDialog.showDialog(getModelItem());
+        }
+    }
+
+    static class ConnectionComboItem {
+        private Connection obj;
+
+        public ConnectionComboItem(Connection connection) {
+            obj = connection;
+        }
+
+        @Override
+        public boolean equals(Object op) {
+            if (op instanceof ConnectionComboItem)
+                return ((ConnectionComboItem) op).obj == obj;
+            else
+                return false;
+        }
+
+        public Connection getObject() {
+            return obj;
+        }
+
+        @Override
+        public String toString() {
+            return obj.getName();
+        }
+    }
+
+    class ConnectionsComboBoxModel extends AbstractListModel<ConnectionComboItem> implements
+            ComboBoxModel<ConnectionComboItem>, ConnectionsListener {
+
+        /** serialVersionUID description. */
+        private static final long serialVersionUID = -7769726049010958997L;
+        private ArrayList<ConnectionComboItem> items = new ArrayList<>();
+        private boolean connectionCreationInProgress = false;
+
+        public ConnectionsComboBoxModel() {
+            updateItems();
+        }
+
+        @Override
+        public void connectionChanged(Connection connection, String propertyName, Object oldPropertyValue,
+                Object newPropertyValue) {
+            if (Utils.areStringsEqual(propertyName, "name"))
+                for (int i = 0; i < items.size(); ++i)
+                    if (items.get(i).getObject() == connection) {
+                        fireContentsChanged(connection, i, i);
+                        break;
+                    }
+        }
+
+        @Override
+        public void connectionListChanged() {
+            updateItems();
+        }
+
+        @Override
+        public ConnectionComboItem getElementAt(int index) {
+            return items.get(index);
+        }
+
+        @Override
+        public Object getSelectedItem() {
+            if (connectionCreationInProgress)
+                return NewConnectionComboItem.getInstance();
+            if (getModelItem().getConnection() == null)
+                return null;
+            return new ConnectionComboItem(getModelItem().getConnection());
+        }
+
+        @Override
+        public int getSize() {
+            return items.size();
+        }
+
+        @Override
+        public void setSelectedItem(Object anItem) {
+            if (anItem == null)
+                getModelItem().setConnection(null);
+            else if (anItem instanceof NewConnectionComboItem) {
+                connectionCreationInProgress = true;
+                UISupport.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        EditConnectionDialog.Result dialogResult = EditConnectionDialog
+                                .createConnection(getModelItem());
+                        connectionCreationInProgress = false;
+                        if (dialogResult == null)
+                            fireContentsChanged(ConnectionsComboBoxModel.this, -1, -1);
+                        else {
+                            Connection newConnection = new Connection(dialogResult.connectionName,
+                                    dialogResult.connectionParams);
+                            ConnectionsManager.addConnection(getModelItem(), newConnection);
+                            getModelItem().setConnection(newConnection);
+                        }
+
+                    }
+                });
+            } else {
+                Connection newParams = ((ConnectionComboItem) anItem).getObject();
+                getModelItem().setConnection(newParams);
+                fireContentsChanged(this, -1, -1);
+            }
+        }
+
+        private void updateItems() {
+            items.clear();
+            List<Connection> list = ConnectionsManager.getAvailableConnections(getModelItem());
+            if (list != null)
+                for (Connection curParams : list)
+                    items.add(new ConnectionComboItem(curParams));
+            items.add(NewConnectionComboItem.getInstance());
+            fireContentsChanged(this, -1, -1);
+        }
+
+    }
+
+    static class NewConnectionComboItem extends ConnectionComboItem {
+        private final static NewConnectionComboItem instance = new NewConnectionComboItem();
+
+        private NewConnectionComboItem() {
+            super(null);
+        }
+
+        public static NewConnectionComboItem getInstance() {
+            return instance;
+        }
+
+        @Override
+        public String toString() {
+            return NEW_CONNECTION_ITEM;
+        }
+    }
+
+    public interface UIOption {
+        String getTitle();
     }
 
 }

@@ -37,6 +37,8 @@ import com.eviware.soapui.support.components.JXToolBar;
 
 public class ConfigureProjectConnectionsDialog extends SimpleDialog {
 
+    /** serialVersionUID description. */
+    private static final long serialVersionUID = 1166476207933608609L;
     private JTable grid;
     private Project connectionsTargetItem;
     private ConnectionsTableModel tableModel;
@@ -52,25 +54,25 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
             connectionsTargetItem = ModelSupport.getModelItemProject(modelItem);
     }
 
+    public static boolean showDialog(ModelItem modelItem) {
+        ConfigureProjectConnectionsDialog dialog = new ConfigureProjectConnectionsDialog(modelItem);
+        try {
+            dialog.setModal(true);
+            UISupport.centerDialog(dialog);
+            UISupport.centerDialog(dialog);
+            dialog.setVisible(true);
+            return true;
+        } finally {
+            dialog.dispose();
+        }
+    }
+
     @Override
     protected Component buildContent() {
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(buildToolbar(), BorderLayout.NORTH);
         mainPanel.add(buildGrid(), BorderLayout.CENTER);
         return mainPanel;
-    }
-
-    private JComponent buildToolbar() {
-        JXToolBar toolBar = UISupport.createToolbar();
-        Action addAction = new AddConnectionAction();
-        toolBar.add(UISupport.createActionButton(addAction, addAction.isEnabled()));
-        editAction = new EditAction();
-        JButton editButton = UISupport.createActionButton(editAction, editAction.isEnabled());
-        toolBar.add(editButton);
-        removeAction = new RemoveConnectionAction();
-        JButton removeButton = UISupport.createActionButton(removeAction, removeAction.isEnabled());
-        toolBar.add(removeButton);
-        return toolBar;
     }
 
     private JComponent buildGrid() {
@@ -95,6 +97,19 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
                 new PasswordRenderer(pswEdit.getEchoChar()));
         grid.getColumn(ConnectionsTableModel.Column.Password).setCellEditor(new DefaultCellEditor(pswEdit));
         return new JScrollPane(grid);
+    }
+
+    private JComponent buildToolbar() {
+        JXToolBar toolBar = UISupport.createToolbar();
+        Action addAction = new AddConnectionAction();
+        toolBar.add(UISupport.createActionButton(addAction, addAction.isEnabled()));
+        editAction = new EditAction();
+        JButton editButton = UISupport.createActionButton(editAction, editAction.isEnabled());
+        toolBar.add(editButton);
+        removeAction = new RemoveConnectionAction();
+        JButton removeButton = UISupport.createActionButton(removeAction, removeAction.isEnabled());
+        toolBar.add(removeButton);
+        return toolBar;
     }
 
     private HashMap<Connection, List<TestStep>> formUsageData() {
@@ -124,19 +139,6 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
                 }
             }
         return usageData;
-    }
-
-    public static boolean showDialog(ModelItem modelItem) {
-        ConfigureProjectConnectionsDialog dialog = new ConfigureProjectConnectionsDialog(modelItem);
-        try {
-            dialog.setModal(true);
-            UISupport.centerDialog(dialog);
-            UISupport.centerDialog(dialog);
-            dialog.setVisible(true);
-            return true;
-        } finally {
-            dialog.dispose();
-        }
     }
 
     @Override
@@ -193,6 +195,25 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
         return true;
     }
 
+    private class AddConnectionAction extends AbstractAction {
+        /** serialVersionUID description. */
+        private static final long serialVersionUID = 7313669609017703632L;
+
+        public AddConnectionAction() {
+            putValue(Action.SHORT_DESCRIPTION, "Add Connection");
+            putValue(Action.SMALL_ICON, UISupport.createImageIcon("com/eviware/soapui/resources/images/add.png"));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            EditConnectionDialog.Result result = EditConnectionDialog.showDialog("Create Connection",
+                    connectionsTargetItem, null, null, null);
+            if (result != null)
+                tableModel.addItem(result.connectionName, result.connectionParams);
+
+        }
+    }
+
     private static class ConnectionRecord {
         public String name;
         public ConnectionParams params;
@@ -200,49 +221,29 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
     }
 
     private static class ConnectionsTableModel extends AbstractTableModel {
-        public enum Column {
-            Name("Name"), ServerUri("Websocket Server URI"), Login("Login"), Password("Password"), Used(
-                    "Used by Test Steps");
-            private final String caption;
-
-            Column(String caption) {
-                this.caption = caption;
-            }
-
-            public String getCaption() {
-                return caption;
-            }
-        }
+        /** serialVersionUID description. */
+        private static final long serialVersionUID = -3787980610508008745L;
 
         private ArrayList<ConnectionRecord> data;
+
         private ArrayList<Connection> removedConnections;
         private HashMap<Connection, List<TestStep>> usageData;
 
-        public void setData(List<Connection> data) {
-            this.data = new ArrayList<>(data == null ? 5 : data.size() + 5);
-            removedConnections = new ArrayList<>();
-            if (data != null)
-                for (Connection connection : data) {
-                    ConnectionRecord record = new ConnectionRecord();
-                    record.name = connection.getName();
-                    record.originalConnection = connection;
-                    record.params = connection.getParams();
-                    this.data.add(record);
-                }
-            fireTableDataChanged();
-        }
-
-        public HashMap<Connection, List<TestStep>> getUsageData() {
-            return usageData;
-        }
-
-        public void setUsageData(HashMap<Connection, List<TestStep>> usageData) {
-            this.usageData = usageData;
+        public int addItem(String name, ConnectionParams params) {
+            ConnectionRecord record = new ConnectionRecord();
+            record.name = name;
+            record.params = params;
+            data.add(record);
+            fireTableRowsInserted(data.size() - 1, data.size() - 1);
+            return data.size() - 1;
         }
 
         @Override
-        public int getRowCount() {
-            return data == null ? 0 : data.size();
+        public Class<?> getColumnClass(int columnIndex) {
+            if (Column.values()[columnIndex] == Column.Used)
+                return Boolean.class;
+            else
+                return super.getColumnClass(columnIndex);
         }
 
         @Override
@@ -253,6 +254,23 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
         @Override
         public String getColumnName(int column) {
             return Column.values()[column].getCaption();
+        }
+
+        public ConnectionRecord getItem(int row) {
+            return data.get(row);
+        }
+
+        public List<Connection> getRemovedConnections() {
+            return removedConnections;
+        }
+
+        @Override
+        public int getRowCount() {
+            return data == null ? 0 : data.size();
+        }
+
+        public HashMap<Connection, List<TestStep>> getUsageData() {
+            return usageData;
         }
 
         @Override
@@ -277,6 +295,38 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
         }
 
         @Override
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            Column column = Column.values()[columnIndex];
+            return column == Column.Name || column == Column.ServerUri || column == Column.Login
+                    || column == Column.Password;
+        }
+
+        public void removeItem(int row) {
+            if (data.get(row).originalConnection != null)
+                removedConnections.add(data.get(row).originalConnection);
+            data.remove(row);
+            fireTableRowsDeleted(row, row);
+        }
+
+        public void setData(List<Connection> data) {
+            this.data = new ArrayList<>(data == null ? 5 : data.size() + 5);
+            removedConnections = new ArrayList<>();
+            if (data != null)
+                for (Connection connection : data) {
+                    ConnectionRecord record = new ConnectionRecord();
+                    record.name = connection.getName();
+                    record.originalConnection = connection;
+                    record.params = connection.getParams();
+                    this.data.add(record);
+                }
+            fireTableDataChanged();
+        }
+
+        public void setUsageData(HashMap<Connection, List<TestStep>> usageData) {
+            this.usageData = usageData;
+        }
+
+        @Override
         public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
             switch (Column.values()[columnIndex]) {
             case Name:
@@ -294,53 +344,54 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
             }
         }
 
-        @Override
-        public boolean isCellEditable(int rowIndex, int columnIndex) {
-            Column column = Column.values()[columnIndex];
-            return column == Column.Name || column == Column.ServerUri || column == Column.Login
-                    || column == Column.Password;
-        }
-
-        @Override
-        public Class<?> getColumnClass(int columnIndex) {
-            if (Column.values()[columnIndex] == Column.Used)
-                return Boolean.class;
-            else
-                return super.getColumnClass(columnIndex);
-        }
-
-        public int addItem(String name, ConnectionParams params) {
-            ConnectionRecord record = new ConnectionRecord();
-            record.name = name;
-            record.params = params;
-            data.add(record);
-            fireTableRowsInserted(data.size() - 1, data.size() - 1);
-            return data.size() - 1;
-        }
-
-        public ConnectionRecord getItem(int row) {
-            return data.get(row);
-        }
-
-        public void removeItem(int row) {
-            if (data.get(row).originalConnection != null)
-                removedConnections.add(data.get(row).originalConnection);
-            data.remove(row);
-            fireTableRowsDeleted(row, row);
-        }
-
         public void updateItem(int row, String name, ConnectionParams params) {
             data.get(row).name = name;
             data.get(row).params = params;
             fireTableRowsUpdated(row, row);
         }
 
-        public List<Connection> getRemovedConnections() {
-            return removedConnections;
+        public enum Column {
+            Name("Name"), ServerUri("Websocket Server URI"), Login("Login"), Password("Password"), Used(
+                    "Used by Test Steps");
+            private final String caption;
+
+            Column(String caption) {
+                this.caption = caption;
+            }
+
+            public String getCaption() {
+                return caption;
+            }
+        }
+    }
+
+    private class EditAction extends AbstractAction {
+        /** serialVersionUID description. */
+        private static final long serialVersionUID = 3951707484497149469L;
+
+        public EditAction() {
+            putValue(Action.SHORT_DESCRIPTION, "Configure Selected Connection");
+            putValue(Action.SMALL_ICON, UISupport.createImageIcon("com/eviware/soapui/resources/images/options.png"));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int rowNo = grid.getSelectionModel().getLeadSelectionIndex();
+            if (rowNo < 0)
+                return;
+            ConnectionRecord focusedRecord = tableModel.getItem(rowNo);
+            EditConnectionDialog.Result result = EditConnectionDialog.showDialog(
+                    String.format("Edit %s Connection", focusedRecord.name), connectionsTargetItem, focusedRecord.name,
+                    focusedRecord.params, null);
+            if (result != null)
+                tableModel.updateItem(rowNo, result.connectionName, result.connectionParams);
+
         }
     }
 
     private static class PasswordRenderer extends DefaultTableCellRenderer {
+        /** serialVersionUID description. */
+        private static final long serialVersionUID = -8129935536446652833L;
         private char passwordChar;
 
         public PasswordRenderer(char passwordChar) {
@@ -360,23 +411,10 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
         }
     }
 
-    private class AddConnectionAction extends AbstractAction {
-        public AddConnectionAction() {
-            putValue(Action.SHORT_DESCRIPTION, "Add Connection");
-            putValue(Action.SMALL_ICON, UISupport.createImageIcon("com/eviware/soapui/resources/images/add.png"));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            EditConnectionDialog.Result result = EditConnectionDialog.showDialog("Create Connection",
-                    connectionsTargetItem, null, null, null);
-            if (result != null)
-                tableModel.addItem(result.connectionName, result.connectionParams);
-
-        }
-    }
-
     private class RemoveConnectionAction extends AbstractAction {
+        /** serialVersionUID description. */
+        private static final long serialVersionUID = -8080128635589936389L;
+
         public RemoveConnectionAction() {
             putValue(Action.SHORT_DESCRIPTION, "Remove Selected Connections");
             putValue(Action.SMALL_ICON, UISupport.createImageIcon("com/eviware/soapui/resources/images/delete.png"));
@@ -457,27 +495,6 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
                     }
                 }
             return result;
-        }
-    }
-
-    private class EditAction extends AbstractAction {
-        public EditAction() {
-            putValue(Action.SHORT_DESCRIPTION, "Configure Selected Connection");
-            putValue(Action.SMALL_ICON, UISupport.createImageIcon("com/eviware/soapui/resources/images/options.png"));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            int rowNo = grid.getSelectionModel().getLeadSelectionIndex();
-            if (rowNo < 0)
-                return;
-            ConnectionRecord focusedRecord = tableModel.getItem(rowNo);
-            EditConnectionDialog.Result result = EditConnectionDialog.showDialog(
-                    String.format("Edit %s Connection", focusedRecord.name), connectionsTargetItem, focusedRecord.name,
-                    focusedRecord.params, null);
-            if (result != null)
-                tableModel.updateItem(rowNo, result.connectionName, result.connectionParams);
-
         }
     }
 

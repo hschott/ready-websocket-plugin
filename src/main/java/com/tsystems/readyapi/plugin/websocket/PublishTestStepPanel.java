@@ -40,6 +40,9 @@ import com.jgoodies.binding.adapter.Bindings;
 
 public class PublishTestStepPanel extends ConnectedTestStepPanel<PublishTestStep> implements ExecutionListener {
 
+    /** serialVersionUID description. */
+    private static final long serialVersionUID = 7242999356880461009L;
+    private final static String LOG_TAB_TITLE = "Test Step Log (%d)";
     private JTextField numberEdit;
     private JTextArea textMemo;
     private JTextField fileNameEdit;
@@ -47,12 +50,11 @@ public class PublishTestStepPanel extends ConnectedTestStepPanel<PublishTestStep
     private JTabbedPane jsonEditor;
     private JComponent jsonTreeEditor;
     private JTabbedPane xmlEditor;
-    private JComponent xmlTreeEditor;
 
+    private JComponent xmlTreeEditor;
     private JInspectorPanel inspectorPanel;
     private JComponentInspector<JComponent> logInspector;
     private JLogList logArea;
-    private final static String LOG_TAB_TITLE = "Test Step Log (%d)";
 
     public PublishTestStepPanel(PublishTestStep modelItem) {
         super(modelItem);
@@ -60,20 +62,24 @@ public class PublishTestStepPanel extends ConnectedTestStepPanel<PublishTestStep
         modelItem.addExecutionListener(this);
     }
 
-    private void buildUI() {
-        JComponent mainPanel = buildMainPanel();
-        inspectorPanel = JInspectorPanelFactory.build(mainPanel);
+    @Override
+    public void afterExecution(ExecutableTestStep testStep, ExecutableTestStepResult executionResult) {
+        logArea.addLine(DateUtil.formatFull(new Date(executionResult.getTimeStamp())) + " - "
+                + executionResult.getOutcome());
+    }
 
-        logInspector = new JComponentInspector<JComponent>(buildLogPanel(), String.format(LOG_TAB_TITLE, 0),
-                "Log of the test step executions", true);
-        inspectorPanel.addInspector(logInspector);
+    protected JComponent buildLogPanel() {
+        logArea = new JLogList("Test Step Log");
 
-        inspectorPanel.setDefaultDividerLocation(0.6F);
-        // inspectorPanel.setCurrentInspector("Assertions");
+        logArea.getLogList().getModel().addListDataListener(new ListDataChangeListener() {
 
-        add(inspectorPanel.getComponent());
-        setPreferredSize(new Dimension(500, 300));
+            @Override
+            public void dataChanged(ListModel model) {
+                logInspector.setTitle(String.format(LOG_TAB_TITLE, model.getSize()));
+            }
+        });
 
+        return logArea;
     }
 
     private JComponent buildMainPanel() {
@@ -160,18 +166,20 @@ public class PublishTestStepPanel extends ConnectedTestStepPanel<PublishTestStep
         return toolBar;
     }
 
-    protected JComponent buildLogPanel() {
-        logArea = new JLogList("Test Step Log");
+    private void buildUI() {
+        JComponent mainPanel = buildMainPanel();
+        inspectorPanel = JInspectorPanelFactory.build(mainPanel);
 
-        logArea.getLogList().getModel().addListDataListener(new ListDataChangeListener() {
+        logInspector = new JComponentInspector<JComponent>(buildLogPanel(), String.format(LOG_TAB_TITLE, 0),
+                "Log of the test step executions", true);
+        inspectorPanel.addInspector(logInspector);
 
-            @Override
-            public void dataChanged(ListModel model) {
-                logInspector.setTitle(String.format(LOG_TAB_TITLE, model.getSize()));
-            }
-        });
+        inspectorPanel.setDefaultDividerLocation(0.6F);
+        // inspectorPanel.setCurrentInspector("Assertions");
 
-        return logArea;
+        add(inspectorPanel.getComponent());
+        setPreferredSize(new Dimension(500, 300));
+
     }
 
     @Override
@@ -210,13 +218,9 @@ public class PublishTestStepPanel extends ConnectedTestStepPanel<PublishTestStep
         return super.release();
     }
 
-    @Override
-    public void afterExecution(ExecutableTestStep testStep, ExecutableTestStepResult executionResult) {
-        logArea.addLine(DateUtil.formatFull(new Date(executionResult.getTimeStamp())) + " - "
-                + executionResult.getOutcome());
-    }
-
     public class SelectFileAction extends AbstractAction {
+        /** serialVersionUID description. */
+        private static final long serialVersionUID = 3499349831088040594L;
         private JFileChooser fileChooser;
 
         public SelectFileAction() {

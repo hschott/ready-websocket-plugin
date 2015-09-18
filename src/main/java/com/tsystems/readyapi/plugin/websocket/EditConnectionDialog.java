@@ -41,31 +41,26 @@ import com.jgoodies.binding.value.AbstractValueModel;
 
 public class EditConnectionDialog extends SimpleDialog {
 
-    public class Result {
-        public String connectionName;
-        public ConnectionParams connectionParams;
+    /** serialVersionUID description. */
+    private static final long serialVersionUID = -5308487928062110765L;
 
-        public Result() {
-            connectionParams = new ConnectionParams();
-        }
-    }
-
-    private JTextField nameEdit;
     private final static Insets defaultInsets = new Insets(4, 4, 4, 4);
+
     private final static Insets defaultInsetsWithIndent = new Insets(defaultInsets.top, defaultInsets.left + 12,
             defaultInsets.bottom, defaultInsets.right);
+    private JTextField nameEdit;
     private JUndoableTextField serverUriEdit;
     private JUndoableTextField subprotocolEdit;
-
     private JCheckBox authRequiredCheckBox;
+
     private JUndoableTextField loginEdit;
     private JPasswordField passwordEdit;
     private JCheckBox hidePasswordCheckBox;
     private HashMap<JComponent, JLabel> componentLabelsMap = new HashMap<>();
-
     private char passwordChar;
 
     private ModelItem modelItemOfConnection;
+
     private String initialName;
     private Connection connection;
     private List<String> presentNames;
@@ -84,18 +79,14 @@ public class EditConnectionDialog extends SimpleDialog {
             connection = new Connection(initialConnectionName, initialConnectionParams);
     }
 
-    public static Result showDialog(String title, ModelItem modelItemOfConnection, String initialConnectionName,
-            ConnectionParams initialConnectionParams, List<String> alreadyPresentNames) {
-        EditConnectionDialog dialog = new EditConnectionDialog(title, modelItemOfConnection, initialConnectionName,
-                initialConnectionParams, alreadyPresentNames);
-        try {
-            dialog.setModal(true);
-            UISupport.centerDialog(dialog);
-            dialog.setVisible(true);
-        } finally {
-            dialog.dispose();
-        }
-        return dialog.result;
+    public static Result createConnection(ModelItem modelItemOfConnection) {
+        Project project = ModelSupport.getModelItemProject(modelItemOfConnection);
+        ArrayList<String> existingNames = new ArrayList<>();
+        List<Connection> connections = ConnectionsManager.getAvailableConnections(project);
+        if (connections != null)
+            for (Connection curConnection : connections)
+                existingNames.add(curConnection.getName());
+        return showDialog("Create New Connection", project, null, null, existingNames);
 
     }
 
@@ -112,14 +103,18 @@ public class EditConnectionDialog extends SimpleDialog {
 
     }
 
-    public static Result createConnection(ModelItem modelItemOfConnection) {
-        Project project = ModelSupport.getModelItemProject(modelItemOfConnection);
-        ArrayList<String> existingNames = new ArrayList<>();
-        List<Connection> connections = ConnectionsManager.getAvailableConnections(project);
-        if (connections != null)
-            for (Connection curConnection : connections)
-                existingNames.add(curConnection.getName());
-        return showDialog("Create New Connection", project, null, null, existingNames);
+    public static Result showDialog(String title, ModelItem modelItemOfConnection, String initialConnectionName,
+            ConnectionParams initialConnectionParams, List<String> alreadyPresentNames) {
+        EditConnectionDialog dialog = new EditConnectionDialog(title, modelItemOfConnection, initialConnectionName,
+                initialConnectionParams, alreadyPresentNames);
+        try {
+            dialog.setModal(true);
+            UISupport.centerDialog(dialog);
+            dialog.setVisible(true);
+        } finally {
+            dialog.dispose();
+        }
+        return dialog.result;
 
     }
 
@@ -134,102 +129,10 @@ public class EditConnectionDialog extends SimpleDialog {
             authRequiredCheckBox.setSelected(true);
     }
 
-    private GridBagConstraints labelPlace(int row) {
-        return new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE,
-                defaultInsets, 0, 0);
-    }
-
-    private GridBagConstraints labelPlaceWithIndent(int row) {
-        return new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE,
-                defaultInsetsWithIndent, 0, 0);
-    }
-
-    private GridBagConstraints extraComponentPlace(int row) {
-        return new GridBagConstraints(2, row, 1, 1, 0, 0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE,
-                defaultInsets, 0, 0);
-    }
-
-    private GridBagConstraints componentPlace(int row) {
-        return new GridBagConstraints(1, row, 1, 1, 0, 0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE,
-                defaultInsets, 0, 0);
-    }
-
-    private GridBagConstraints largePlace(int row) {
-        return new GridBagConstraints(1, row, 2, 1, 0, 0, GridBagConstraints.BASELINE_LEADING,
-                GridBagConstraints.HORIZONTAL, defaultInsets, 0, 0);
-    }
-
-    public static class IsVisibleValueModel extends AbstractValueModel {
-        private JComponent component;
-
-        public IsVisibleValueModel(JComponent component) {
-            this.component = component;
-            this.component.addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentShown(ComponentEvent e) {
-                    fireValueChange(false, true);
-                }
-
-                @Override
-                public void componentHidden(ComponentEvent e) {
-                    fireValueChange(true, false);
-                }
-            });
-        }
-
-        @Override
-        public Object getValue() {
-            return component.isVisible();
-        }
-
-        @Override
-        public void setValue(Object newValue) {
-        }
-    }
-
-    public static class IsCheckedValueModel extends AbstractValueModel {
-        private JCheckBox component;
-
-        public IsCheckedValueModel(final JCheckBox component) {
-            this.component = component;
-            this.component.addItemListener(new ItemListener() {
-                @Override
-                public void itemStateChanged(ItemEvent e) {
-                    fireValueChange(!component.isSelected(), component.isSelected());
-                }
-            });
-        }
-
-        @Override
-        public Object getValue() {
-            return component.isSelected();
-        }
-
-        @Override
-        public void setValue(Object newValue) {
-        }
-
-    }
-
-    private JLabel createLabel(String text, final JComponent targetComponent, int hitCharNo) {
-        JLabel label = new JLabel(text);
-        label.setLabelFor(targetComponent);
-        if (targetComponent != null) {
-            Bindings.bind(label, "visible", new IsVisibleValueModel(targetComponent));
-            Bindings.bind(label, "enabled", new PropertyAdapter<JComponent>(targetComponent, "enabled", true));
-        }
-        if (hitCharNo >= 0) {
-            label.setDisplayedMnemonic(text.charAt(hitCharNo));
-            label.setDisplayedMnemonicIndex(hitCharNo);
-        }
-        return label;
-    }
-
     @Override
     protected Component buildContent() {
-        JLabel label;
         final int defEditCharCount = 30;
-        final Dimension minMemoSize = new Dimension(50, 180);
+        new Dimension(50, 180);
         final int indentSize = 20;
 
         int row = 0;
@@ -315,6 +218,35 @@ public class EditConnectionDialog extends SimpleDialog {
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     }
 
+    private GridBagConstraints componentPlace(int row) {
+        return new GridBagConstraints(1, row, 1, 1, 0, 0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE,
+                defaultInsets, 0, 0);
+    }
+
+    private JLabel createLabel(String text, final JComponent targetComponent, int hitCharNo) {
+        JLabel label = new JLabel(text);
+        label.setLabelFor(targetComponent);
+        if (targetComponent != null) {
+            Bindings.bind(label, "visible", new IsVisibleValueModel(targetComponent));
+            Bindings.bind(label, "enabled", new PropertyAdapter<JComponent>(targetComponent, "enabled", true));
+        }
+        if (hitCharNo >= 0) {
+            label.setDisplayedMnemonic(text.charAt(hitCharNo));
+            label.setDisplayedMnemonicIndex(hitCharNo);
+        }
+        return label;
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+    }
+
+    private GridBagConstraints extraComponentPlace(int row) {
+        return new GridBagConstraints(2, row, 1, 1, 0, 0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE,
+                defaultInsets, 0, 0);
+    }
+
     @Override
     protected boolean handleOk() {
         if (StringUtils.isNullOrEmpty(nameEdit.getText())) {
@@ -365,12 +297,89 @@ public class EditConnectionDialog extends SimpleDialog {
         return true;
     }
 
-    @Override
-    public void dispose() {
-        super.dispose();
+    private GridBagConstraints labelPlace(int row) {
+        return new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE,
+                defaultInsets, 0, 0);
+    }
+
+    private GridBagConstraints labelPlaceWithIndent(int row) {
+        return new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE,
+                defaultInsetsWithIndent, 0, 0);
+    }
+
+    private GridBagConstraints largePlace(int row) {
+        return new GridBagConstraints(1, row, 2, 1, 0, 0, GridBagConstraints.BASELINE_LEADING,
+                GridBagConstraints.HORIZONTAL, defaultInsets, 0, 0);
+    }
+
+    public static class IsCheckedValueModel extends AbstractValueModel {
+        /** serialVersionUID description. */
+        private static final long serialVersionUID = -7698588095167209408L;
+        private JCheckBox component;
+
+        public IsCheckedValueModel(final JCheckBox component) {
+            this.component = component;
+            this.component.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    fireValueChange(!component.isSelected(), component.isSelected());
+                }
+            });
+        }
+
+        @Override
+        public Object getValue() {
+            return component.isSelected();
+        }
+
+        @Override
+        public void setValue(Object newValue) {
+        }
+
+    }
+
+    public static class IsVisibleValueModel extends AbstractValueModel {
+        /** serialVersionUID description. */
+        private static final long serialVersionUID = -3278995837998406344L;
+        private JComponent component;
+
+        public IsVisibleValueModel(JComponent component) {
+            this.component = component;
+            this.component.addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentHidden(ComponentEvent e) {
+                    fireValueChange(true, false);
+                }
+
+                @Override
+                public void componentShown(ComponentEvent e) {
+                    fireValueChange(false, true);
+                }
+            });
+        }
+
+        @Override
+        public Object getValue() {
+            return component.isVisible();
+        }
+
+        @Override
+        public void setValue(Object newValue) {
+        }
+    }
+
+    public class Result {
+        public String connectionName;
+        public ConnectionParams connectionParams;
+
+        public Result() {
+            connectionParams = new ConnectionParams();
+        }
     }
 
     public class SelectFileAction extends AbstractAction {
+        /** serialVersionUID description. */
+        private static final long serialVersionUID = -8407757799130481919L;
         private JFileChooser fileChooser;
         private JTextField fileNameEdit;
 
