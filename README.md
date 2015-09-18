@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/hschott/ready-websocket-plugin.svg)](https://travis-ci.org/hschott/ready-websocket-plugin)
+
 ## Ready! API Websocket Plugin
 
 This plugin adds three TestSteps to the functional testing in Ready! API
