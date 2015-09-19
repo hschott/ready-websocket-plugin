@@ -12,7 +12,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -56,7 +55,6 @@ public class EditConnectionDialog extends SimpleDialog {
     private JUndoableTextField loginEdit;
     private JPasswordField passwordEdit;
     private JCheckBox hidePasswordCheckBox;
-    private HashMap<JComponent, JLabel> componentLabelsMap = new HashMap<>();
     private char passwordChar;
 
     private ModelItem modelItemOfConnection;

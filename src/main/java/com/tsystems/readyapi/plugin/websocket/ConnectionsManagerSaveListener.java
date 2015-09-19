@@ -12,14 +12,13 @@ import com.eviware.soapui.model.workspace.WorkspaceListener;
 import com.eviware.soapui.plugins.ListenerConfiguration;
 
 @ListenerConfiguration
-public class ConnectionsGrabber implements ProjectListener, WorkspaceListener {
+public class ConnectionsManagerSaveListener implements ProjectListener, WorkspaceListener {
 
-    public ConnectionsGrabber() {
+    public ConnectionsManagerSaveListener() {
     }
 
     @Override
     public void afterLoad(Project project) {
-        ConnectionsManager.onProjectLoaded(project);
     }
 
     @Override

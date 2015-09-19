@@ -37,9 +37,7 @@ public class JsonTreeEditor extends JsonObjectTree {
 
     public void setText(String text) {
         isCurValueNull = text == null;
-        if (isCurValueNull)
-            text = "";
-        setContent(text);
+        setContent(isCurValueNull ? "" : text);
         detectChange();
     }
 

@@ -90,7 +90,7 @@ public class ExpandedConnectionParams {
     public void setCredentials(String login, String password) {
         if (login == null || login.length() == 0) {
             this.login = login;
-            password = null;
+            this.password = null;
         } else {
             this.login = login;
             this.password = password;

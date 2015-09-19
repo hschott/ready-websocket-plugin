@@ -221,9 +221,7 @@ public class Connection implements PropertyChangeNotifier {
 
     public void setServerUri(String serverUri) {
         String oldServerUri = getServerUri();
-        if (serverUri == null)
-            serverUri = "";
-        originalServerUri = serverUri;
+        originalServerUri = serverUri == null ? "" : serverUri;
         if (!Utils.areStringsEqual(oldServerUri, originalServerUri))
             notifyPropertyChanged("serverUri", oldServerUri, originalServerUri);
     }

@@ -34,7 +34,7 @@ public class Client {
     }
 
     public void cancel() {
-        Future future;
+        Future<?> future;
         if ((future = this.future.get()) != null)
             future.cancel(true);
     }
@@ -82,7 +82,7 @@ public class Client {
     }
 
     public boolean isAvailable() {
-        Future future;
+        Future<?> future;
         if ((future = this.future.get()) != null)
             return future.isDone();
         else

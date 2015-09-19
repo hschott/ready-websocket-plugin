@@ -26,6 +26,7 @@ import com.eviware.soapui.ui.support.ModelItemDesktopPanel;
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.Bindings;
 import com.jgoodies.binding.list.SelectionInList;
+import com.tsystems.readyapi.plugin.websocket.ConnectedTestStep.TimeMeasure;
 
 public class ConnectedTestStepPanel<T extends ConnectedTestStep> extends ModelItemDesktopPanel<T> {
 
@@ -69,7 +70,7 @@ public class ConnectedTestStepPanel<T extends ConnectedTestStep> extends ModelIt
     }
 
     protected void buildRadioButtonsFromEnum(SimpleBindingForm form, PresentationModel<T> pm, String label,
-            String propertyName, Class propertyType) {
+            String propertyName, Class<?> propertyType) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
@@ -88,9 +89,8 @@ public class ConnectedTestStepPanel<T extends ConnectedTestStep> extends ModelIt
         JSpinner spinEdit = Utils.createBoundSpinEdit(pm, "shownTimeout", 0, Integer.MAX_VALUE, 1);
         spinEdit.setPreferredSize(new Dimension(80, spinEdit.getHeight()));
         timeoutPanel.add(spinEdit);
-        JComboBox measureCombo = new JComboBox(ConnectedTestStep.TimeMeasure.values());
-        Bindings.bind(measureCombo,
-                new SelectionInList<Object>(ConnectedTestStep.TimeMeasure.values(), pm.getModel("timeoutMeasure")));
+        JComboBox<TimeMeasure> measureCombo = new JComboBox<TimeMeasure>(TimeMeasure.values());
+        Bindings.bind(measureCombo, new SelectionInList<Object>(TimeMeasure.values(), pm.getModel("timeoutMeasure")));
         timeoutPanel.add(measureCombo);
         timeoutPanel.add(new JLabel(" (0 - forever)"));
         form.append(label, timeoutPanel);

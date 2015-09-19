@@ -86,14 +86,14 @@ class ConnectionsManager implements PropertyChangeListener {
                 } catch (Throwable e) {
                     LOGGER.error(e);
                 }
-    };
+    }
 
     public static List<Connection> getAvailableConnections(ModelItem modelItem) {
         ArrayList<Connection> projectConnections = getInstance().getProjectConnectionsList(modelItem, false);
         if (projectConnections == null)
             return null;
         return new ArrayList<Connection>(projectConnections);
-    };
+    }
 
     public static Connection getConnection(ModelItem modelItem, String connectionName) {
         if (StringUtils.isNullOrEmpty(connectionName))
@@ -142,18 +142,6 @@ class ConnectionsManager implements PropertyChangeListener {
         if (closedConnections != null)
             for (Connection connection : closedConnections)
                 connection.removePropertyChangeListener(getInstance());
-    }
-
-    static void onProjectLoaded(Project project) {
-        // if(instance == null) return;
-        // ArrayList<Connection> projectConnections = grabConnections(project);
-        // if(projectConnections != null){
-        // for(Connection connection: projectConnections){
-        // connection.addPropertyChangeListener(getInstance());
-        // }
-        // }
-        // getInstance().connections.put(project, projectConnections);
-        // fireConnectionsListChangedEvent(project);
     }
 
     public static void removeConnection(ModelItem modelItem, Connection connection) {

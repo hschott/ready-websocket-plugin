@@ -99,6 +99,7 @@ enum PublishedMessageType {
                 buf = new byte[fileLen];
                 FileInputStream stream = new FileInputStream(file);
                 stream.read(buf);
+                stream.close();
                 return new Message.BinaryMessage(buf);
 
             } catch (RuntimeException | IOException e) {

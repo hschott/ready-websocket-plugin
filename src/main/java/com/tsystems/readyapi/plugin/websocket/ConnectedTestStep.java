@@ -321,7 +321,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
         boolean old;
         try {
             Field field = null;
-            Class curClass = getClass();
+            Class<?> curClass = getClass();
             while (field == null && curClass != null)
                 try {
                     field = curClass.getDeclaredField(propName);
