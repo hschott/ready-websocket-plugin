@@ -46,7 +46,7 @@ public class ExpandedConnectionParams {
         return true;
     }
 
-    public String getActualServerUri() throws URISyntaxException {
+    public String getNormalizedServerUri() throws URISyntaxException {
         URI uri = new URI(originalServerUri);
         if (uri.getAuthority() == null)
             uri = new URI("ws://" + originalServerUri);
@@ -58,10 +58,6 @@ public class ExpandedConnectionParams {
                 uri = new URI("wss", uri.getUserInfo(), uri.getHost(), PluginConfig.DEFAULT_SSL_PORT, uri.getPath(),
                         uri.getQuery(), uri.getFragment());
         return uri.toString();
-    }
-
-    public String getNormalizedServerUri() throws URISyntaxException {
-        return getActualServerUri().toLowerCase(Locale.ENGLISH);
     }
 
     public String getServerUri() {
