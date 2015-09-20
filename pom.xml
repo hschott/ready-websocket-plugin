@@ -6,7 +6,7 @@
 		<name>Ready! API Websocket Plugin</name>
 		<artifactId>ready-websocket-plugin</artifactId>
 		<groupId>com.tsystems.readyapi.plugin.websocket</groupId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 		<repositories>
 
 				<repository>
