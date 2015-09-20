@@ -37,6 +37,7 @@ public class RunTestStepAction extends AbstractAction implements Runnable, Cance
         if (isExecutionInProgress)
             UISupport.showErrorMessage("Test step is still running. Unable to start it again.");
         isExecutionInProgress = true;
+        isCancelled = false;
         setEnabled(false);
         stopAction.setEnabled(true);
         future = SoapUI.getThreadPool().submit(this);
@@ -51,11 +52,6 @@ public class RunTestStepAction extends AbstractAction implements Runnable, Cance
     }
 
     @Override
-    public String cancellationReason() {
-        return null;
-    }
-
-    @Override
     public boolean cancelled() {
         return isCancelled;
     }
@@ -66,7 +62,6 @@ public class RunTestStepAction extends AbstractAction implements Runnable, Cance
 
     private void onFinish() {
         isExecutionInProgress = false;
-        isCancelled = false;
         future = null;
         setEnabled(true);
         stopAction.setEnabled(false);

@@ -288,11 +288,6 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
     public TestStepResult run(final TestCaseRunner testRunner, TestCaseRunContext testRunContext) {
         return doExecute(testRunContext, new CancellationToken() {
             @Override
-            public String cancellationReason() {
-                return null;
-            }
-
-            @Override
             public boolean cancelled() {
                 return !testRunner.isRunning();
             }

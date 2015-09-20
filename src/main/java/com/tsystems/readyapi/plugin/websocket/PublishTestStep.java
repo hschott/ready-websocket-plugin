@@ -115,23 +115,23 @@ public class PublishTestStep extends ConnectedTestStep {
     protected ExecutableTestStepResult doExecute(PropertyExpansionContext testRunContext,
             CancellationToken cancellationToken) {
 
-        ExecutableTestStepResult testStepResult = new ExecutableTestStepResult(this);
-        testStepResult.startTimer();
-        testStepResult.setStatus(TestStepResult.TestStepStatus.OK);
+        ExecutableTestStepResult result = new ExecutableTestStepResult(this);
+        result.startTimer();
+        result.setStatus(TestStepResult.TestStepStatus.OK);
         if (iconAnimator != null)
             iconAnimator.start();
         try {
             try {
-                Client client = getClient(testRunContext, testStepResult);
+                Client client = getClient(testRunContext, result);
                 if (client == null) {
-                    testStepResult.setStatus(TestStepResult.TestStepStatus.FAILED);
-                    return testStepResult;
+                    result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                    return result;
                 }
                 String expandedMessage = testRunContext.expand(message);
 
-                if (!checkProperties(testStepResult, messageKind, expandedMessage)) {
-                    testStepResult.setStatus(TestStepResult.TestStepStatus.FAILED);
-                    return testStepResult;
+                if (!checkProperties(result, messageKind, expandedMessage)) {
+                    result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                    return result;
                 }
                 long starTime = System.nanoTime();
                 long maxTime = getTimeout() == 0 ? Long.MAX_VALUE : starTime + (long) getTimeout() * 1000 * 1000;
@@ -140,29 +140,29 @@ public class PublishTestStep extends ConnectedTestStep {
                 try {
                     message = messageKind.toMessage(expandedMessage, getOwningProject());
                 } catch (RuntimeException e) {
-                    testStepResult.addMessage(e.getMessage());
-                    testStepResult.setStatus(TestStepResult.TestStepStatus.FAILED);
-                    return testStepResult;
+                    result.addMessage(e.getMessage());
+                    result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                    return result;
                 }
 
-                if (!waitForConnection(client, cancellationToken, testStepResult, maxTime))
-                    return testStepResult;
+                if (!waitForConnection(client, cancellationToken, result, maxTime))
+                    return result;
 
-                if (!sendMessage(client, message, cancellationToken, testStepResult, maxTime))
-                    return testStepResult;
+                if (!sendMessage(client, message, cancellationToken, result, maxTime))
+                    return result;
 
             } catch (Exception e) {
-                testStepResult.setStatus(TestStepResult.TestStepStatus.FAILED);
-                testStepResult.setError(e);
+                result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                result.setError(e);
             }
-            return testStepResult;
+            return result;
         } finally {
-            testStepResult.stopTimer();
+            result.stopTimer();
             if (iconAnimator != null)
                 iconAnimator.stop();
-            testStepResult.setOutcome(formOutcome(testStepResult));
-            log.info(String.format("%s - [%s test step]", testStepResult.getOutcome(), getName()));
-            notifyExecutionListeners(testStepResult);
+            result.setOutcome(formOutcome(result));
+            log.info(String.format("%s - [%s test step]", result.getOutcome(), getName()));
+            notifyExecutionListeners(result);
         }
     }
 
@@ -190,7 +190,6 @@ public class PublishTestStep extends ConnectedTestStep {
             return String.format("The message has been published within %d ms", executionResult.getTimeTaken());
 
         }
-
     }
 
     public String getMessage() {

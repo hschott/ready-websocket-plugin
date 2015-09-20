@@ -191,6 +191,10 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
         try {
             try {
                 Client client = getClient(runContext, result);
+                if (client == null) {
+                    result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                    return result;
+                }
 
                 long starTime = System.nanoTime();
                 long maxTime = getTimeout() == 0 ? Long.MAX_VALUE : starTime + (long) getTimeout() * 1000 * 1000;

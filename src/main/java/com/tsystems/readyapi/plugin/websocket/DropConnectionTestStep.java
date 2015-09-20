@@ -52,11 +52,14 @@ public class DropConnectionTestStep extends ConnectedTestStep {
         if (iconAnimator != null)
             iconAnimator.start();
         try {
-            Client client = getClient(testRunContext, result);
-            if (client == null)
-                return result;
-            if (client.isConnected())
-                try {
+            try {
+                Client client = getClient(testRunContext, result);
+                if (client == null) {
+                    result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                    return result;
+                }
+
+                if (client.isConnected())
                     switch (dropMethod) {
                     case SendDisconnect:
                         client.disconnect(false);
@@ -65,13 +68,13 @@ public class DropConnectionTestStep extends ConnectedTestStep {
                         client.disconnect(true);
                         break;
                     }
-                } catch (Exception e) {
+                else {
+                    result.addMessage("Already disconnected from the websocket server");
                     result.setStatus(TestStepResult.TestStepStatus.FAILED);
-                    result.setError(e);
                 }
-            else {
-                result.addMessage("Already disconnected from the websocket server");
+            } catch (Exception e) {
                 result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                result.setError(e);
             }
 
             return result;
@@ -80,6 +83,7 @@ public class DropConnectionTestStep extends ConnectedTestStep {
             result.stopTimer();
             if (iconAnimator != null)
                 iconAnimator.stop();
+            notifyExecutionListeners(result);
         }
 
     }

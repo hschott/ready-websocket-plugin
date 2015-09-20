@@ -175,7 +175,6 @@ public class PublishTestStepPanel extends ConnectedTestStepPanel<PublishTestStep
         inspectorPanel.addInspector(logInspector);
 
         inspectorPanel.setDefaultDividerLocation(0.6F);
-        // inspectorPanel.setCurrentInspector("Assertions");
 
         add(inspectorPanel.getComponent());
         setPreferredSize(new Dimension(500, 300));

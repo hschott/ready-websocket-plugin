@@ -59,8 +59,10 @@ public class Client {
         if ((session = this.session.get()) != null)
             if (!harshDisconnect)
                 session.close(new CloseStatus(StatusCode.NORMAL, "drop connection test step"));
-            else
+            else {
                 session.disconnect();
+                this.session.set(null);
+            }
     }
 
     public void dispose() {

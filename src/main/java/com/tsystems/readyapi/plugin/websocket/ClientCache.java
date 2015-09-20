@@ -38,7 +38,8 @@ public class ClientCache {
                 upgradeRequest.setHeader("Authorization", "Basic " + basicAuthHeader);
             }
             upgradeRequest.setRequestURI(new URI(connectionParams.getNormalizedServerUri()));
-            upgradeRequest.setSubProtocols(connectionParams.subprotocols);
+            if (connectionParams.hasSubprotocols())
+                upgradeRequest.setSubProtocols(connectionParams.subprotocols.split(","));
         }
         return upgradeRequest;
     }
