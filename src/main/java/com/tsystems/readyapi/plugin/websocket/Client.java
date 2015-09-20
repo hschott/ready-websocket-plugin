@@ -5,8 +5,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.websocket.api.CloseException;
 import org.eclipse.jetty.websocket.api.CloseStatus;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
@@ -43,6 +45,7 @@ public class Client {
         if (isConnected())
             return;
         try {
+            throwable.set(null);
             future.set(webSocketClient.connect(this, upgradeRequest.getRequestURI(), upgradeRequest));
         } catch (Exception e) {
             Throwable th = ExceptionUtils.getRootCause(e);
@@ -55,7 +58,7 @@ public class Client {
         Session session;
         if ((session = this.session.get()) != null)
             if (!harshDisconnect)
-                session.close(new CloseStatus(1001, ""));
+                session.close(new CloseStatus(StatusCode.NORMAL, "drop connection test step"));
             else
                 session.disconnect();
     }
@@ -111,8 +114,9 @@ public class Client {
     public void onWebSocketClose(int statusCode, String reason) {
         LOGGER.info("WebSocketClose statusCode=" + statusCode + " reason=" + reason);
         messageQueue = new MessageQueue();
+        if (statusCode > StatusCode.NORMAL)
+            throwable.set(new CloseException(statusCode, reason));
         session.set(null);
-        throwable.set(null);
     }
 
     @OnWebSocketConnect
@@ -142,8 +146,11 @@ public class Client {
     }
 
     public void sendMessage(Message<?> message) {
+        if (!isConnected())
+            return;
         Session session;
         if ((session = this.session.get()) != null) {
+            throwable.set(null);
             if (message instanceof Message.TextMessage) {
                 Message.TextMessage text = (Message.TextMessage) message;
                 future.set(session.getRemote().sendStringByFuture(text.getPayload()));

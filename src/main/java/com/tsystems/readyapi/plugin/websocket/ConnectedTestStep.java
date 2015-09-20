@@ -596,6 +596,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
             testStepResult.setStatus(TestStepResult.TestStepStatus.FAILED);
             return false;
         }
+
         return true;
     }
 
