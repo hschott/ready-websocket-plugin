@@ -6,6 +6,7 @@ import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.config.TestStepConfig;
 import com.eviware.soapui.impl.wsdl.support.IconAnimator;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
+import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStepResult;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 import com.eviware.soapui.model.testsuite.TestStepResult;
 import com.eviware.soapui.monitor.TestMonitor;
@@ -83,9 +84,24 @@ public class DropConnectionTestStep extends ConnectedTestStep {
             result.stopTimer();
             if (iconAnimator != null)
                 iconAnimator.stop();
+            result.setOutcome(formOutcome(result));
             notifyExecutionListeners(result);
         }
+    }
 
+    private String formOutcome(WsdlTestStepResult executionResult) {
+        switch (executionResult.getStatus()) {
+        case CANCELED:
+            return "CANCELED";
+        case FAILED:
+            if (executionResult.getError() == null)
+                return "Unable to drop connection";
+            else
+                return "Error during drop connection: " + Utils.getExceptionMessage(executionResult.getError());
+        default:
+            return String.format("The connection has been dropped within %d ms", executionResult.getTimeTaken());
+
+        }
     }
 
     @Override
