@@ -133,11 +133,18 @@ This field specifies how to interpret a received message payload. If a message c
 
 **Timeout**
 
-The test step will fail if a message isn't received within a specified period.
+The test step will fail if a valid message isn't received within a specified period.
 
 **Received message**
 
-The payload of a message which was received as a result of the test step execution.
+The payload of a valid message which was received as a result of the test step execution.
+
+**Assertions**
+
+When present, assertions will continuously applied against the received stream of messages. Only if all given assertions match then this test step succeeds.
+
+If no assertion is present then the first received message will be set as valid message.
+
 
 ### Drop Websocket Connection
 
