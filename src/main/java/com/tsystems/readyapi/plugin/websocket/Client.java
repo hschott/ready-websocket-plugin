@@ -1,6 +1,8 @@
 package com.tsystems.readyapi.plugin.websocket;
 
+import java.util.Queue;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -27,7 +29,7 @@ public class Client {
     private AtomicReference<Throwable> throwable = new AtomicReference<Throwable>();
     private WebSocketClient webSocketClient;
     private ClientUpgradeRequest upgradeRequest;
-    private MessageQueue messageQueue = new MessageQueue();
+    private Queue<Message<?>> messageQueue = new LinkedBlockingQueue<Message<?>>();
     private AtomicReference<Future<?>> future = new AtomicReference<Future<?>>();
 
     public Client(WebSocketClient webSocketClient, ClientUpgradeRequest upgradeRequest) {
@@ -78,7 +80,7 @@ public class Client {
         }
     }
 
-    public MessageQueue getMessageQueue() {
+    public Queue<Message<?>> getMessageQueue() {
         return messageQueue;
     }
 
@@ -109,13 +111,13 @@ public class Client {
     @OnWebSocketMessage
     public void onWebSocketBinary(byte[] payload, int offset, int length) {
         Message.BinaryMessage message = new Message.BinaryMessage(payload, offset, length);
-        messageQueue.addMessage(message);
+        messageQueue.offer(message);
     }
 
     @OnWebSocketClose
     public void onWebSocketClose(int statusCode, String reason) {
         LOGGER.info("WebSocketClose statusCode=" + statusCode + " reason=" + reason);
-        messageQueue = new MessageQueue();
+        messageQueue.clear();
         if (statusCode > StatusCode.NORMAL)
             throwable.set(new CloseException(statusCode, reason));
         session.set(null);
@@ -144,7 +146,7 @@ public class Client {
     @OnWebSocketMessage
     public void onWebSocketText(String payload) {
         Message.TextMessage message = new Message.TextMessage(payload);
-        messageQueue.addMessage(message);
+        messageQueue.offer(message);
     }
 
     public void sendMessage(Message<?> message) {

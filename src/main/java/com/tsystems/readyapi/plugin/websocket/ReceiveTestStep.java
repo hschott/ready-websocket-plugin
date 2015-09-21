@@ -12,6 +12,7 @@ import java.nio.charset.CodingErrorAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
@@ -41,7 +42,6 @@ import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 import com.eviware.soapui.model.support.DefaultTestStepProperty;
 import com.eviware.soapui.model.support.TestStepBeanProperty;
 import com.eviware.soapui.model.testsuite.Assertable;
-import com.eviware.soapui.model.testsuite.AssertionError;
 import com.eviware.soapui.model.testsuite.AssertionsListener;
 import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestCaseRunContext;
@@ -202,49 +202,56 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                 int connectAttemptCount = 0;
 
                 Message<?> msg = null;
-                MessageQueue messageQueue = client.getMessageQueue();
-                messageQueue.setCurrentMessageToHead();
+                Queue<Message<?>> messageQueue = client.getMessageQueue();
+                boolean failed = false;
                 while (System.nanoTime() <= maxTime && !cancellationToken.cancelled())
-                    if ((msg = messageQueue.getMessage()) != null) {
-                        messageQueue.removeCurrentMessage();
-                        break;
+
+                    if ((msg = messageQueue.poll()) != null) {
+
+                        if (!storeMessage(msg, result)) {
+                            result.addMessage(String
+                                    .format("Unable to extract a content of \"%s\" type from the message.",
+                                            expectedMessageType));
+                            result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                            return result;
+                        }
+
+                        for (WsdlMessageAssertion assertion : assertionsSupport.getAssertionList()) {
+                            applyAssertion(assertion);
+                            failed = assertion.isFailed();
+                        }
+
+                        if (!failed)
+                            break;
+
                     } else if (!client.isConnected() && connectAttemptCount == 0) {
                         if (!waitForConnection(client, cancellationToken, result, maxTime))
                             return result;
                         ++connectAttemptCount;
                     }
-                if (msg == null) {
+
+                if (msg == null || failed)
                     if (cancellationToken.cancelled())
                         result.setStatus(TestStepResult.TestStepStatus.CANCELED);
                     else {
                         result.addMessage("The test step's timeout has expired");
                         result.setStatus(TestStepResult.TestStepStatus.FAILED);
                     }
-                    return result;
-                } else if (!storeMessage(msg, result)) {
-                    result.setStatus(TestStepResult.TestStepStatus.FAILED);
-                    return result;
-                }
-
-                for (WsdlMessageAssertion assertion : assertionsSupport.getAssertionList()) {
-                    applyAssertion(assertion);
-                    AssertionError[] errors = assertion.getErrors();
-                    if (errors != null)
-                        for (AssertionError error : errors)
-                            result.addMessage("[" + assertion.getName() + "] " + error.getMessage());
-                }
 
             } catch (Exception e) {
                 result.setError(e);
                 result.setStatus(TestStepResult.TestStepStatus.FAILED);
             }
+
             return result;
         } finally {
             result.stopTimer();
             if (iconAnimator != null)
                 iconAnimator.stop();
             updateState();
-            if (result.getStatus() == TestStepResult.TestStepStatus.UNKNOWN)
+            if (result.getStatus() == TestStepResult.TestStepStatus.UNKNOWN) {
+                assertReceivedMessage();
+
                 switch (getAssertionStatus()) {
                 case FAILED:
                     result.setStatus(TestStepResult.TestStepStatus.FAILED);
@@ -253,6 +260,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                     result.setStatus(TestStepResult.TestStepStatus.OK);
                     break;
                 }
+            }
             result.setOutcome(formOutcome(result));
             log.info(String.format("%s - [%s test step]", result.getOutcome(), getName()));
             notifyExecutionListeners(result);
@@ -273,9 +281,10 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     private String formOutcome(ExecutableTestStepResult executionResult) {
         if (executionResult.getStatus() == TestStepResult.TestStepStatus.CANCELED)
             return "CANCELED";
-        else if (getReceivedMessage() == null) {
+        else if (executionResult.getStatus() == TestStepResult.TestStepStatus.FAILED) {
             if (executionResult.getError() == null)
-                return "Unable to receive a message (" + StringUtils.join(executionResult.getMessages(), " ") + ")";
+                return "Unable to receive a valid message (" + StringUtils.join(executionResult.getMessages(), " ")
+                        + ")";
             else
                 return "Error during message receiving: " + Utils.getExceptionMessage(executionResult.getError());
         } else
@@ -438,7 +447,6 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
             updateData();
             assertReceivedMessage();
         }
-
     }
 
     @Override
