@@ -31,7 +31,7 @@ Every websocket test step has the 'Connection' combo-box. Choose `<New Connectio
 
 The 'Create Connection' dialog will appear:
 
-<img width="619" alt="new connection" src="https://cloud.githubusercontent.com/assets/4548589/9987415/fd524612-6047-11e5-9b68-3dff0a23f0e5.png">
+<img width="614" alt="create connection" src="https://cloud.githubusercontent.com/assets/4548589/10012738/eff03740-610a-11e5-8735-2b65f01a1615.png">
 
 You have to specify the following settings for the connection (note that the connection may be used in any test case in the project, so only project level property expansions will work correctly for connection settings):
 
@@ -64,7 +64,8 @@ After you close the 'Create Connection' dialog by clicking `Ok`, this connection
 If you want to browse all connections related to the project or remove some needless connections, open any Publish or Receive test step editor and click on the `Configure Websocket Connections of the Project` toolbar button:
 
 The 'Configure Connections to Websocket Servers' dialog will appear:
-<img width="653" alt="configure connections" src="https://cloud.githubusercontent.com/assets/4548589/9987579/5af2ae64-6049-11e5-9f89-cd4b35c1026a.png">
+
+<img width="650" alt="configure connections" src="https://cloud.githubusercontent.com/assets/4548589/10012740/f40a647c-610a-11e5-86ed-b4dfd450b576.png">
 
 This dialog allows you to manage all connections used for the current project. 
  
@@ -73,7 +74,7 @@ This dialog allows you to manage all connections used for the current project.
 
 This test step publishes a message on the selected server. 
 
-<img width="498" alt="publish message" src="https://cloud.githubusercontent.com/assets/4548589/9987698/6dcee222-604a-11e5-88d1-6bc1fbfbb457.png">
+<img width="568" alt="publish message" src="https://cloud.githubusercontent.com/assets/4548589/10012741/f662de48-610a-11e5-8c5b-62b05cd966f6.png">
 
 **Connection**
 
@@ -112,7 +113,7 @@ The test step will fail if a connection to websocket server is not established a
 
 This test step waits until a message is received from the websocket server and optionaly asserts the message.
 
-<img width="550" alt="receive message" src="https://cloud.githubusercontent.com/assets/4548589/9987897/1531df1e-604c-11e5-8965-f7c967825829.png">
+<img width="548" alt="receive message" src="https://cloud.githubusercontent.com/assets/4548589/10012742/fbfe5c7e-610a-11e5-9f50-85ffadd33b9f.png">
 
 **Connection**
 
@@ -150,7 +151,7 @@ If no assertion is present then the first received message will be set as valid 
 
 This test step disconnects from the websocket server which is useful if you are testing scenarios in which dropped connections are a factor.
 
-<img width="646" alt="drop connection" src="https://cloud.githubusercontent.com/assets/4548589/9988001/38ae1f10-604d-11e5-8411-f4a1502346d4.png">
+<img width="642" alt="drop connection" src="https://cloud.githubusercontent.com/assets/4548589/10012743/04379a40-610b-11e5-9cd1-5ea219593008.png">
 
 **Connection**
 
