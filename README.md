@@ -47,6 +47,10 @@ This is the URI of the websocket server. Server URI should contain the protocol 
 Server URI may also contain a port number. If the port is not specified, it will default to 80 for ws:// server URIs, and 443 for wss:// server URIs.
 Example of URI: `ws://localhost:80`
 
+**Subprotocols**
+
+The optional subprotocols to use in the websocket upgrade request as comma-separated list.
+
 **Authentication**
 
 Check this option if the websocket server requires authentication.
