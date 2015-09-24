@@ -160,7 +160,7 @@ public class DropConnectionTestStep extends ConnectedTestStep {
     }
 
     public enum DropMethod implements ConnectedTestStepPanel.UIOption {
-        SendDisconnect("Send Disconnect message to websocket server"), Drop("Close network connection");
+        SendDisconnect("Send Normal Close message"), Drop("Send Protocol Error message");
         private String title;
 
         DropMethod(String title) {

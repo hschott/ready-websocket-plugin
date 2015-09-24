@@ -574,6 +574,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                     testStepResult.setStatus(TestStepResult.TestStepStatus.CANCELED);
                     client.cancel();
                 } else {
+                    testStepResult.addMessage(errorText);
                     testStepResult.addMessage(TIMEOUT_EXPIRED_MSG);
                     testStepResult.setStatus(TestStepResult.TestStepStatus.FAILED);
                 }

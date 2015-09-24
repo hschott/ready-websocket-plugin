@@ -6,7 +6,6 @@ import java.util.Locale;
 
 public class ExpandedConnectionParams {
     private String originalServerUri;
-    public String fixedId;
     public String subprotocols;
     public String login;
     public String password;

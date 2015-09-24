@@ -14,6 +14,9 @@
                 <include>org.eclipse.jetty.websocket:websocket-api:*</include>
                 <include>org.eclipse.jetty.websocket:websocket-client:*</include>
                 <include>org.eclipse.jetty.websocket:websocket-common:*</include>
+
+                <include>org.glassfish.tyrus.bundles:tyrus-standalone-client:*</include>
+                <include>org.glassfish.tyrus.bundles:tyrus-standalone-client-jdk:*</include>
             </includes>
         </dependencySet>
         <dependencySet>
