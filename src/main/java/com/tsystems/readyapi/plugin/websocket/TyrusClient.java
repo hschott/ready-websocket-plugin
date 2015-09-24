@@ -308,8 +308,6 @@ public class TyrusClient extends Endpoint implements Client {
      */
     @Override
     public void sendMessage(Message<?> message) {
-        if (!isConnected())
-            return;
         Session session;
         if ((session = this.session.get()) != null) {
             throwable.set(null);
