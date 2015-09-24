@@ -26,22 +26,13 @@
 				</repository>
 		</repositories>
 
-
-
 		<dependencies>
-
 				<dependency>
 						<groupId>com.smartbear</groupId>
 						<artifactId>ready-api-ui</artifactId>
 						<version>1.4.0</version>
 						<scope>provided</scope>
 				</dependency>
-				<dependency>
-						<groupId>org.eclipse.jetty.websocket</groupId>
-						<artifactId>websocket-client</artifactId>
-						<version>9.3.0.M2</version>
-				</dependency>
-
 				<dependency>
 						<groupId>org.glassfish.tyrus.bundles</groupId>
 						<artifactId>tyrus-standalone-client-jdk</artifactId>
