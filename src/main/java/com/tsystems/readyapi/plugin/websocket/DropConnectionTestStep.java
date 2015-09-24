@@ -11,6 +11,7 @@ import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 import com.eviware.soapui.model.testsuite.TestStepResult;
 import com.eviware.soapui.monitor.TestMonitor;
 import com.eviware.soapui.plugins.auto.PluginTestStep;
+import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.xml.XmlObjectConfigurationReader;
 
@@ -95,7 +96,7 @@ public class DropConnectionTestStep extends ConnectedTestStep {
             return "CANCELED";
         case FAILED:
             if (executionResult.getError() == null)
-                return "Unable to drop connection";
+                return "Unable to drop connection (" + StringUtils.join(executionResult.getMessages(), " ") + ")";
             else
                 return "Error during drop connection: " + Utils.getExceptionMessage(executionResult.getError());
         default:
