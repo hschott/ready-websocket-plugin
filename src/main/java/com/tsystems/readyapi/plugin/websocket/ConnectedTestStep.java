@@ -567,7 +567,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
 
     protected boolean waitInternal(Client client, CancellationToken cancellationToken,
             WsdlTestStepResult testStepResult, long maxTime, String errorText) {
-        while ((!client.isConnected() || !client.isAvailable()) && !client.isFaulty()) {
+        while ((!client.isAvailable() || !client.isConnected()) && !client.isFaulty()) {
             boolean stopped = cancellationToken.cancelled();
             if (stopped || maxTime != Long.MAX_VALUE && System.nanoTime() > maxTime) {
                 if (stopped) {
