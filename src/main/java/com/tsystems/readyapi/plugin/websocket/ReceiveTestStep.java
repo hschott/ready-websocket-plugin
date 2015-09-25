@@ -237,6 +237,8 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                         result.addMessage("The test step's timeout has expired");
                         result.setStatus(TestStepResult.TestStepStatus.FAILED);
                     }
+                else
+                    result.setStatus(TestStepResult.TestStepStatus.OK);
 
             } catch (Exception e) {
                 result.setError(e);

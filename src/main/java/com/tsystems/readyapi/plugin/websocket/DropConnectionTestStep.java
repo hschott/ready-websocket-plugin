@@ -61,16 +61,20 @@ public class DropConnectionTestStep extends ConnectedTestStep {
                     return result;
                 }
 
-                if (client.isConnected())
+                if (client.isConnected()) {
                     switch (dropMethod) {
                     case SendDisconnect:
                         client.disconnect(false);
+
                         break;
                     case Drop:
                         client.disconnect(true);
                         break;
                     }
-                else {
+
+                    result.setStatus(TestStepResult.TestStepStatus.OK);
+
+                } else {
                     result.addMessage("Already disconnected from the websocket server");
                     result.setStatus(TestStepResult.TestStepStatus.FAILED);
                 }
