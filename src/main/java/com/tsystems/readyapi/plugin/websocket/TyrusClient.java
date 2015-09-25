@@ -1,12 +1,10 @@
 package com.tsystems.readyapi.plugin.websocket;
 
+import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -27,15 +25,12 @@ import org.glassfish.tyrus.client.ClientProperties;
 import org.glassfish.tyrus.client.SslContextConfigurator;
 import org.glassfish.tyrus.client.SslEngineConfigurator;
 import org.glassfish.tyrus.client.auth.Credentials;
-import org.glassfish.tyrus.core.Base64Utils;
 import org.glassfish.tyrus.core.WebSocketException;
 
+import com.btr.proxy.selector.direct.NoProxySelector;
 import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.SoapUISystemProperties;
-import com.eviware.soapui.impl.wsdl.support.http.ProxyUtils;
-import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
 import com.eviware.soapui.model.settings.Settings;
-import com.eviware.soapui.settings.ProxySettings;
 import com.eviware.soapui.settings.SSLSettings;
 import com.eviware.soapui.support.StringUtils;
 
@@ -50,6 +45,7 @@ public class TyrusClient extends Endpoint implements Client {
     private ClientEndpointConfig cec;
     private ClientManager client;
     private URI uri;
+    private ProxySelector proxySelector;
 
     public TyrusClient(ExpandedConnectionParams connectionParams) throws URISyntaxException {
         ClientEndpointConfig.Builder builder = ClientEndpointConfig.Builder.create();
@@ -73,27 +69,6 @@ public class TyrusClient extends Endpoint implements Client {
 
         Settings settings = SoapUI.getSettings();
 
-        if (ProxyUtils.isProxyEnabled() && !ProxyUtils.isAutoProxy()) {
-            String proxyHost = expandedProperty(settings, ProxySettings.HOST);
-            String proxyPort = expandedProperty(settings, ProxySettings.PORT);
-            if (!StringUtils.isNullOrEmpty(proxyHost) && !StringUtils.isNullOrEmpty(proxyPort))
-                client.getProperties().put(ClientProperties.PROXY_URI, "http://" + proxyHost + ":" + proxyPort);
-
-            String proxyUsername = expandedProperty(settings, ProxySettings.USERNAME);
-            String proxyPassword = expandedProperty(settings, ProxySettings.PASSWORD);
-            if (!StringUtils.isNullOrEmpty(proxyUsername)) {
-                final Map<String, String> proxyHeaders = new HashMap<String, String>();
-                proxyHeaders
-                        .put("Proxy-Authorization",
-                                "Basic "
-                                        + Base64Utils.encodeToString((proxyUsername + ":" + proxyPassword)
-                                                .getBytes(Charset.forName("UTF-8")), false));
-
-                client.getProperties().put(ClientProperties.PROXY_HEADERS, proxyHeaders);
-            }
-        } else
-            client.getProperties().remove(ClientProperties.PROXY_URI);
-
         String keyStoreUrl = System.getProperty(SoapUISystemProperties.SOAPUI_SSL_KEYSTORE_LOCATION,
                 settings.getString(SSLSettings.KEYSTORE, null));
 
@@ -111,14 +86,14 @@ public class TyrusClient extends Endpoint implements Client {
             client.getProperties().put(ClientProperties.SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
         }
 
+        // FIXME: workaround https://java.net/jira/browse/TYRUS-412
+        ProxySelector proxySelector = ProxySelector.getDefault();
+        if (proxySelector == null)
+            ProxySelector.setDefault(NoProxySelector.getInstance());
+
         this.client = client;
 
         uri = new URI(connectionParams.getNormalizedServerUri());
-    }
-
-    private static String expandedProperty(Settings settings, String property) {
-        String content = settings.getString(property, "");
-        return PropertyExpander.expandProperties(content);
     }
 
     /**
@@ -183,6 +158,7 @@ public class TyrusClient extends Endpoint implements Client {
                 session.close();
             this.session.set(null);
             throwable.set(null);
+            ProxySelector.setDefault(proxySelector);
         } catch (Exception e) {
             LOGGER.error(e);
         }
