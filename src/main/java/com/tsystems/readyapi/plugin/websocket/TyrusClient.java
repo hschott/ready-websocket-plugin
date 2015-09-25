@@ -87,7 +87,7 @@ public class TyrusClient extends Endpoint implements Client {
         }
 
         // FIXME: workaround https://java.net/jira/browse/TYRUS-412
-        ProxySelector proxySelector = ProxySelector.getDefault();
+        proxySelector = ProxySelector.getDefault();
         if (proxySelector == null)
             ProxySelector.setDefault(NoProxySelector.getInstance());
 
