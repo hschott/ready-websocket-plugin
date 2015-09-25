@@ -31,7 +31,7 @@ Every websocket test step has the 'Connection' combo-box. Choose `<New Connectio
 
 The 'Create Connection' dialog will appear:
 
-<img width="614" alt="create connection" src="https://cloud.githubusercontent.com/assets/4548589/10012738/eff03740-610a-11e5-8735-2b65f01a1615.png">
+<img width="614" alt="create connection" src="https://cloud.githubusercontent.com/assets/4548589/10111457/7c154596-63d4-11e5-8066-3881fc2bcf75.png">
 
 You have to specify the following settings for the connection (note that the connection may be used in any test case in the project, so only project level property expansions will work correctly for connection settings):
 
@@ -69,7 +69,7 @@ If you want to browse all connections related to the project or remove some need
 
 The 'Configure Connections to Websocket Servers' dialog will appear:
 
-<img width="650" alt="configure connections" src="https://cloud.githubusercontent.com/assets/4548589/10012740/f40a647c-610a-11e5-86ed-b4dfd450b576.png">
+<img width="690" alt="configure connections" src="https://cloud.githubusercontent.com/assets/4548589/10111459/7ece95f8-63d4-11e5-9eea-da08484a5a11.png">
 
 This dialog allows you to manage all connections used for the current project. 
  
@@ -78,7 +78,7 @@ This dialog allows you to manage all connections used for the current project.
 
 This test step publishes a message on the selected server. 
 
-<img width="568" alt="publish message" src="https://cloud.githubusercontent.com/assets/4548589/10012741/f662de48-610a-11e5-8c5b-62b05cd966f6.png">
+<img width="573" alt="publish message" src="https://cloud.githubusercontent.com/assets/4548589/10111462/813c2c42-63d4-11e5-8b11-104800eb8274.png">
 
 **Connection**
 
@@ -117,7 +117,7 @@ The test step will fail if a connection to websocket server is not established a
 
 This test step waits until a message is received from the websocket server and optionaly asserts the message.
 
-<img width="548" alt="receive message" src="https://cloud.githubusercontent.com/assets/4548589/10012742/fbfe5c7e-610a-11e5-9f50-85ffadd33b9f.png">
+<img width="629" alt="receive message" src="https://cloud.githubusercontent.com/assets/4548589/10111464/842ad066-63d4-11e5-99c9-df877ee9ca73.png">
 
 **Connection**
 
