@@ -155,7 +155,7 @@ If no assertion is present then the first received message will be set as valid 
 
 This test step disconnects from the websocket server which is useful if you are testing scenarios in which dropped connections are a factor.
 
-<img width="642" alt="drop connection" src="https://cloud.githubusercontent.com/assets/4548589/10012743/04379a40-610b-11e5-9cd1-5ea219593008.png">
+<img width="536" alt="drop connection" src="https://cloud.githubusercontent.com/assets/4548589/10111185/9c9b83d6-63d2-11e5-8af1-5d2c06b79e0b.png">
 
 **Connection**
 
@@ -169,9 +169,9 @@ Click this button if you wish to customize the connection selected for this test
 
 You can choose one of these methods:
 
-* 'Send Disconnect message to websocket server' - Send status code `1000` and status reason `drop connection test step` message to the websocket server
+* 'Send Normal Close message' - Send status code `1000` and status reason `drop connection test step` message to the websocket server
 
-* 'Close network connection' - Close the network connection (This behavior simulates some network or client related problems)
+* 'Send Protocol Error message' - Send status code `1002` and status reason `drop connection test step` message to the websocket server
  
 
 
