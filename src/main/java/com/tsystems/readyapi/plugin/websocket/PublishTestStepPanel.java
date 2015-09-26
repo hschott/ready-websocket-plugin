@@ -233,11 +233,6 @@ public class PublishTestStepPanel extends ConnectedTestStepPanel<PublishTestStep
 
             int returnVal = fileChooser.showOpenDialog(UISupport.getMainFrame());
             if (returnVal == JFileChooser.APPROVE_OPTION)
-                // String projectDir = new
-                // File(getModelItem().getProject().getPath()).getParent();
-                // File selectedFile = new File(projectDir,
-                // fileChooser.getSelectedFile().getAbsolutePath());
-                // fileNameEdit.setText(selectedFile.getPath());
                 fileNameEdit.setText(fileChooser.getSelectedFile().getAbsolutePath());
         }
     }
