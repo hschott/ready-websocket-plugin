@@ -337,6 +337,9 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
             case ServerUri:
                 data.get(rowIndex).params.serverUri = (String) aValue;
                 break;
+            case Subprotocols:
+                data.get(rowIndex).params.subprotocols = (String) aValue;
+                break;
             case Login:
                 data.get(rowIndex).params.login = (String) aValue;
                 break;
