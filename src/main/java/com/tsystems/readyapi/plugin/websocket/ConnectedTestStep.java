@@ -123,7 +123,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
     }
 
     private boolean checkConnectionParams(ExpandedConnectionParams connectionParams, WsdlTestStepResult log) {
-        String uriCheckResult = Utils.checkServerUri(connectionParams.getServerUri());
+        String uriCheckResult = ConnectionParams.checkServerUri(connectionParams.getServerUri());
         if (uriCheckResult == null)
             return true;
         log.addMessage(uriCheckResult);

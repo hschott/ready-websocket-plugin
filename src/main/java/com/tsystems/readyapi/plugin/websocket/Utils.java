@@ -2,8 +2,6 @@ package com.tsystems.readyapi.plugin.websocket;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
@@ -12,12 +10,12 @@ import javax.swing.JTextArea;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import com.eviware.soapui.model.ModelItem;
-import com.eviware.soapui.support.StringUtils;
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.SpinnerAdapterFactory;
 import com.jgoodies.binding.value.ValueModel;
@@ -58,31 +56,6 @@ class Utils {
             r[i * 2 + 1] = decimals.charAt(buf[i] & 0x0f);
         }
         return new String(r);
-    }
-
-    public static String checkServerUri(String serverUri) {
-        if (StringUtils.isNullOrEmpty(serverUri))
-            return "The Server URI is not specified for the connection.";
-        else {
-            URI uri;
-            try {
-                uri = new URI(serverUri);
-                String protocol;
-                if (uri.getAuthority() == null) {
-                    uri = new URI("ws://" + serverUri);
-                    protocol = "ws";
-                } else
-                    protocol = uri.getScheme();
-                if (protocol != null && !areStringsEqual(protocol, "ws", false)
-                        && !areStringsEqual(protocol, "wss", false))
-                    return "The Server URI contains unknown protocol. Only \"ws\" and \"wss\" are allowed.";
-                if (StringUtils.isNullOrEmpty(uri.getHost()))
-                    return "The Server URI contains no host.";
-            } catch (URISyntaxException e) {
-                return "The string specified as Server URI is not a valid URI.";
-            }
-        }
-        return null;
     }
 
     public static <B> JSpinner createBoundSpinEdit(PresentationModel<B> pm, String propertyName, int minPropValue,
@@ -144,11 +117,8 @@ class Utils {
     }
 
     public static String getExceptionMessage(Throwable e) {
-        String result = StringUtils.hasContent(e.getMessage()) ? String.format("%s \"%s\"", e.getClass().getName(),
-                e.getMessage()) : e.getClass().getName();
-        if (e.getCause() != null)
-            result += "; cause: " + getExceptionMessage(e.getCause());
-        return result;
+        Throwable cause = ExceptionUtils.getRootCause(e);
+        return cause != null ? cause.toString() : e.toString();
     }
 
     public static byte[] hexStringToBytes(String str) {

@@ -1,5 +1,10 @@
 package com.tsystems.readyapi.plugin.websocket;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import com.eviware.soapui.support.StringUtils;
+
 public class ConnectionParams {
     public String serverUri;
     public String login;
@@ -71,6 +76,31 @@ public class ConnectionParams {
             this.login = login;
             this.password = password;
         }
+    }
+
+    public static String checkServerUri(String serverUri) {
+        if (StringUtils.isNullOrEmpty(serverUri))
+            return "The Server URI is not specified for the connection.";
+        else {
+            URI uri;
+            try {
+                uri = new URI(serverUri);
+                String protocol;
+                if (uri.getAuthority() == null) {
+                    uri = new URI("ws://" + serverUri);
+                    protocol = "ws";
+                } else
+                    protocol = uri.getScheme();
+                if (protocol != null && !Utils.areStringsEqual(protocol, "ws", false)
+                        && !Utils.areStringsEqual(protocol, "wss", false))
+                    return "The Server URI contains unknown protocol. Only \"ws\" and \"wss\" are allowed.";
+                if (StringUtils.isNullOrEmpty(uri.getHost()))
+                    return "The Server URI contains no host.";
+            } catch (URISyntaxException e) {
+                return "The string specified as Server URI is not a valid URI.";
+            }
+        }
+        return null;
     }
 
 }
