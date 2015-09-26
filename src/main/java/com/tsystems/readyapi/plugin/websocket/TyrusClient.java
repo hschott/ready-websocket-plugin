@@ -46,6 +46,7 @@ public class TyrusClient extends Endpoint implements Client {
     private ClientManager client;
     private URI uri;
     private ProxySelector proxySelector;
+    private boolean proxySelectorWorkaround;
 
     public TyrusClient(ExpandedConnectionParams connectionParams) throws URISyntaxException {
         ClientEndpointConfig.Builder builder = ClientEndpointConfig.Builder.create();
@@ -86,11 +87,6 @@ public class TyrusClient extends Endpoint implements Client {
             client.getProperties().put(ClientProperties.SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
         }
 
-        // FIXME: workaround https://java.net/jira/browse/TYRUS-412
-        proxySelector = ProxySelector.getDefault();
-        if (proxySelector == null)
-            ProxySelector.setDefault(NoProxySelector.getInstance());
-
         this.client = client;
 
         uri = new URI(connectionParams.getNormalizedServerUri());
@@ -118,13 +114,26 @@ public class TyrusClient extends Endpoint implements Client {
         if (isConnected())
             return;
         try {
+            checkProxySelector();
+
             throwable.set(null);
+
             Future<Session> future = client.asyncConnectToServer(this, cec, uri);
             this.future.set(future);
+
         } catch (Exception e) {
             Throwable th = ExceptionUtils.getRootCause(e);
             throwable.set(th != null ? th : e);
             LOGGER.error(th != null ? th : e);
+        }
+    }
+
+    // FIXME: workaround https://java.net/jira/browse/TYRUS-412
+    public void checkProxySelector() {
+        proxySelector = ProxySelector.getDefault();
+        if (proxySelector == null) {
+            proxySelectorWorkaround = true;
+            ProxySelector.setDefault(NoProxySelector.getInstance());
         }
     }
 
@@ -152,13 +161,14 @@ public class TyrusClient extends Endpoint implements Client {
      */
     @Override
     public void dispose() {
+        resetProxySelector();
+
         try {
             Session session;
             if ((session = this.session.get()) != null)
                 session.close();
             this.session.set(null);
             throwable.set(null);
-            ProxySelector.setDefault(proxySelector);
         } catch (Exception e) {
             LOGGER.error(e);
         }
@@ -236,6 +246,11 @@ public class TyrusClient extends Endpoint implements Client {
         LOGGER.info("WebSocketClose statusCode=" + closeReason.getCloseCode() + " reason="
                 + closeReason.getReasonPhrase());
         messageQueue.clear();
+
+        resetProxySelector();
+
+        this.session.set(null);
+
         if (closeReason.getCloseCode().getCode() > CloseCodes.NORMAL_CLOSURE.getCode())
             throwable.set(new WebSocketException("websocket connection closed") {
 
@@ -243,8 +258,18 @@ public class TyrusClient extends Endpoint implements Client {
                 public CloseReason getCloseReason() {
                     return closeReason;
                 }
+
+                @Override
+                public String toString() {
+                    return getMessage() + "  " + closeReason.toString();
+                }
             });
-        this.session.set(null);
+    }
+
+    // FIXME: workaround https://java.net/jira/browse/TYRUS-412
+    public void resetProxySelector() {
+        if (proxySelectorWorkaround)
+            ProxySelector.setDefault(proxySelector);
     }
 
     @Override
@@ -269,11 +294,17 @@ public class TyrusClient extends Endpoint implements Client {
             }
         });
         this.session.set(session);
+
+        resetProxySelector();
+
     }
 
     @Override
     public void onError(Session session, Throwable cause) {
         LOGGER.error("WebSocketError", cause);
+
+        resetProxySelector();
+
         throwable.set(cause);
     }
 
