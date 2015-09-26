@@ -533,8 +533,14 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                     return true;
                 }
 
+                break;
+
             case BinaryData:
                 setReceivedMessage(bytesToHexString(payload));
+                return true;
+
+            case Text:
+                setReceivedMessage(new String(payload, Charsets.UTF_8));
                 return true;
             }
 
@@ -544,12 +550,38 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
 
         if (message instanceof Message.TextMessage) {
             Message.TextMessage text = (Message.TextMessage) message;
-            setReceivedMessage(text.getPayload());
+            switch (expectedMessageType) {
+            case IntegerNumber:
+                try {
+                    Long number = Long.parseLong(text.getPayload());
+                    setReceivedMessage(String.valueOf(number));
+                    return true;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+
+            case FloatNumber:
+                try {
+                    Double number = Double.parseDouble(text.getPayload());
+                    setReceivedMessage(String.valueOf(number));
+                    return true;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+
+            case BinaryData:
+                setReceivedMessage(bytesToHexString(text.getPayload().getBytes(Charset.forName("utf-8"))));
+                return true;
+
+            case Text:
+                setReceivedMessage(text.getPayload());
+                return true;
+            }
+
             return true;
         }
 
         return false;
-
     }
 
     @Override
