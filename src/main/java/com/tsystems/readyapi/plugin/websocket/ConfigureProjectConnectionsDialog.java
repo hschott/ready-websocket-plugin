@@ -143,7 +143,7 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(650, 450);
+        return new Dimension(800, 350);
     }
 
     @Override
@@ -280,6 +280,8 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
                 return data.get(rowIndex).name;
             case ServerUri:
                 return data.get(rowIndex).params.serverUri;
+            case Subprotocols:
+                return data.get(rowIndex).params.subprotocols;
             case Login:
                 return data.get(rowIndex).params.login;
             case Password:
@@ -297,8 +299,8 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
         @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
             Column column = Column.values()[columnIndex];
-            return column == Column.Name || column == Column.ServerUri || column == Column.Login
-                    || column == Column.Password;
+            return column == Column.Name || column == Column.ServerUri || column == Column.Subprotocols
+                    || column == Column.Login || column == Column.Password;
         }
 
         public void removeItem(int row) {
@@ -351,8 +353,8 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
         }
 
         public enum Column {
-            Name("Name"), ServerUri("Websocket Server URI"), Login("Login"), Password("Password"), Used(
-                    "Used by Test Steps");
+            Name("Name"), ServerUri("Websocket Server URI"), Subprotocols("Subprotocols"), Login("Login"), Password(
+                    "Password"), Used("Used by Test Steps");
             private final String caption;
 
             Column(String caption) {
