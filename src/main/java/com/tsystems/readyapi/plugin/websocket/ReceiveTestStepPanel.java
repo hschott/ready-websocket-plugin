@@ -231,20 +231,17 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
     }
 
     @Override
-    public boolean onClose(boolean canCancel) {
-        if (super.onClose(canCancel)) {
-            getModelItem().removeExecutionListener(this);
-            getModelItem().removeAssertionsListener(this);
-            assertionsPanel.release();
-            inspectorPanel.release();
-            if (jsonTreeEditor != null)
-                Utils.releaseTreeEditor(jsonTreeEditor);
-            if (xmlTreeEditor != null)
-                Utils.releaseTreeEditor(xmlTreeEditor);
-            return true;
-        }
+    public boolean release() {
+        getModelItem().removeExecutionListener(this);
+        getModelItem().removeAssertionsListener(this);
+        assertionsPanel.release();
+        inspectorPanel.release();
+        if (jsonTreeEditor != null)
+            Utils.releaseTreeEditor(jsonTreeEditor);
+        if (xmlTreeEditor != null)
+            Utils.releaseTreeEditor(xmlTreeEditor);
 
-        return false;
+        return super.release();
     }
 
     @Override
@@ -272,7 +269,6 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
                 xmlEditor.setVisible(false);
             }
         }
-
     }
 
     private void updateStatusIcon() {
