@@ -69,7 +69,7 @@ If you want to browse all connections related to the project or remove some need
 
 The 'Configure Connections to Websocket Servers' dialog will appear:
 
-<img width="690" alt="configure connections" src="https://cloud.githubusercontent.com/assets/4548589/10111459/7ece95f8-63d4-11e5-9eea-da08484a5a11.png">
+<img width="800" alt="configure connections" src="https://cloud.githubusercontent.com/assets/4548589/10119507/32ae29e4-6498-11e5-847d-c672d083e03b.png">
 
 This dialog allows you to manage all connections used for the current project. 
  
