@@ -255,7 +255,7 @@ public class TyrusClient extends Endpoint implements Client {
         this.session.set(null);
 
         if (closeReason.getCloseCode().getCode() > CloseCodes.NORMAL_CLOSURE.getCode())
-            throwable.set(new WebSocketException("websocket connection closed") {
+            throwable.set(new WebSocketException("Websocket connection closed.") {
 
                 @Override
                 public CloseReason getCloseReason() {
@@ -264,7 +264,13 @@ public class TyrusClient extends Endpoint implements Client {
 
                 @Override
                 public String toString() {
-                    return getMessage() + "  " + closeReason.toString();
+                    return getMessage()
+                            + " ["
+                            + closeReason.getCloseCode().getCode()
+                            + "] "
+                            + closeReason.getCloseCode()
+                            + (StringUtils.hasContent(closeReason.getReasonPhrase()) ? " '"
+                                    + closeReason.getReasonPhrase() + "' " : "");
                 }
             });
     }
