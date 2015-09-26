@@ -31,7 +31,7 @@ Every websocket test step has the 'Connection' combo-box. Choose `<New Connectio
 
 The 'Create Connection' dialog will appear:
 
-<img width="614" alt="create connection" src="https://cloud.githubusercontent.com/assets/4548589/10012738/eff03740-610a-11e5-8735-2b65f01a1615.png">
+<img width="614" alt="create connection" src="https://cloud.githubusercontent.com/assets/4548589/10111457/7c154596-63d4-11e5-8066-3881fc2bcf75.png">
 
 You have to specify the following settings for the connection (note that the connection may be used in any test case in the project, so only project level property expansions will work correctly for connection settings):
 
@@ -69,7 +69,7 @@ If you want to browse all connections related to the project or remove some need
 
 The 'Configure Connections to Websocket Servers' dialog will appear:
 
-<img width="650" alt="configure connections" src="https://cloud.githubusercontent.com/assets/4548589/10012740/f40a647c-610a-11e5-86ed-b4dfd450b576.png">
+<img width="800" alt="configure connections" src="https://cloud.githubusercontent.com/assets/4548589/10119507/32ae29e4-6498-11e5-847d-c672d083e03b.png">
 
 This dialog allows you to manage all connections used for the current project. 
  
@@ -78,7 +78,7 @@ This dialog allows you to manage all connections used for the current project.
 
 This test step publishes a message on the selected server. 
 
-<img width="568" alt="publish message" src="https://cloud.githubusercontent.com/assets/4548589/10012741/f662de48-610a-11e5-8c5b-62b05cd966f6.png">
+<img width="573" alt="publish message" src="https://cloud.githubusercontent.com/assets/4548589/10111462/813c2c42-63d4-11e5-8b11-104800eb8274.png">
 
 **Connection**
 
@@ -117,7 +117,7 @@ The test step will fail if a connection to websocket server is not established a
 
 This test step waits until a message is received from the websocket server and optionaly asserts the message.
 
-<img width="548" alt="receive message" src="https://cloud.githubusercontent.com/assets/4548589/10012742/fbfe5c7e-610a-11e5-9f50-85ffadd33b9f.png">
+<img width="629" alt="receive message" src="https://cloud.githubusercontent.com/assets/4548589/10111464/842ad066-63d4-11e5-99c9-df877ee9ca73.png">
 
 **Connection**
 
@@ -155,7 +155,7 @@ If no assertion is present then the first received message will be set as valid 
 
 This test step disconnects from the websocket server which is useful if you are testing scenarios in which dropped connections are a factor.
 
-<img width="642" alt="drop connection" src="https://cloud.githubusercontent.com/assets/4548589/10012743/04379a40-610b-11e5-9cd1-5ea219593008.png">
+<img width="536" alt="drop connection" src="https://cloud.githubusercontent.com/assets/4548589/10111185/9c9b83d6-63d2-11e5-8af1-5d2c06b79e0b.png">
 
 **Connection**
 
@@ -169,9 +169,9 @@ Click this button if you wish to customize the connection selected for this test
 
 You can choose one of these methods:
 
-* 'Send Disconnect message to websocket server' - Send status code `1000` and status reason `drop connection test step` message to the websocket server
+* 'Send Normal Close message' - Send status code `1000` and status reason `drop connection test step` message to the websocket server
 
-* 'Close network connection' - Close the network connection (This behavior simulates some network or client related problems)
+* 'Send Protocol Error message' - Send status code `1002` and status reason `drop connection test step` message to the websocket server
  
 
 

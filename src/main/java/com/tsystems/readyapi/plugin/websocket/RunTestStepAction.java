@@ -52,7 +52,7 @@ public class RunTestStepAction extends AbstractAction implements Runnable, Cance
     }
 
     @Override
-    public boolean cancelled() {
+    public boolean isCancelled() {
         return isCancelled;
     }
 

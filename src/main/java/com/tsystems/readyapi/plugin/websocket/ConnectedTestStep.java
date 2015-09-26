@@ -123,7 +123,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
     }
 
     private boolean checkConnectionParams(ExpandedConnectionParams connectionParams, WsdlTestStepResult log) {
-        String uriCheckResult = Utils.checkServerUri(connectionParams.getServerUri());
+        String uriCheckResult = ConnectionParams.checkServerUri(connectionParams.getServerUri());
         if (uriCheckResult == null)
             return true;
         log.addMessage(uriCheckResult);
@@ -288,7 +288,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
     public TestStepResult run(final TestCaseRunner testRunner, TestCaseRunContext testRunContext) {
         return doExecute(testRunContext, new CancellationToken() {
             @Override
-            public boolean cancelled() {
+            public boolean isCancelled() {
                 return !testRunner.isRunning();
             }
         });
@@ -567,22 +567,18 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
 
     protected boolean waitInternal(Client client, CancellationToken cancellationToken,
             WsdlTestStepResult testStepResult, long maxTime, String errorText) {
-        while ((!client.isConnected() || !client.isAvailable()) && !client.isFaulty()) {
-            boolean stopped = cancellationToken.cancelled();
-            if (stopped || maxTime != Long.MAX_VALUE && System.nanoTime() > maxTime) {
-                if (stopped) {
+        while ((!client.isAvailable() || !client.isConnected()) && !client.isFaulty()) {
+            boolean cancelled = cancellationToken.isCancelled();
+            if (cancelled || maxTime != Long.MAX_VALUE && System.nanoTime() > maxTime) {
+                if (cancelled) {
                     testStepResult.setStatus(TestStepResult.TestStepStatus.CANCELED);
                     client.cancel();
                 } else {
+                    testStepResult.addMessage(errorText);
                     testStepResult.addMessage(TIMEOUT_EXPIRED_MSG);
                     testStepResult.setStatus(TestStepResult.TestStepStatus.FAILED);
                 }
                 return false;
-            }
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                //
             }
         }
         if (client.getThrowable() != null) {

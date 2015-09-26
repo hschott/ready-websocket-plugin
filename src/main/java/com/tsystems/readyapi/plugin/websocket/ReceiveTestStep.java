@@ -12,7 +12,6 @@ import java.nio.charset.CodingErrorAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
@@ -202,11 +201,10 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                 int connectAttemptCount = 0;
 
                 Message<?> msg = null;
-                Queue<Message<?>> messageQueue = client.getMessageQueue();
                 boolean failed = false;
-                while (System.nanoTime() <= maxTime && !cancellationToken.cancelled())
+                while (System.nanoTime() <= maxTime && !cancellationToken.isCancelled())
 
-                    if ((msg = messageQueue.poll()) != null) {
+                    if ((msg = client.nextMessage()) != null) {
 
                         if (!storeMessage(msg, result)) {
                             result.addMessage(String
@@ -231,12 +229,14 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                     }
 
                 if (msg == null || failed)
-                    if (cancellationToken.cancelled())
+                    if (cancellationToken.isCancelled())
                         result.setStatus(TestStepResult.TestStepStatus.CANCELED);
                     else {
                         result.addMessage("The test step's timeout has expired");
                         result.setStatus(TestStepResult.TestStepStatus.FAILED);
                     }
+                else
+                    result.setStatus(TestStepResult.TestStepStatus.OK);
 
             } catch (Exception e) {
                 result.setError(e);
@@ -533,8 +533,14 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                     return true;
                 }
 
+                break;
+
             case BinaryData:
                 setReceivedMessage(bytesToHexString(payload));
+                return true;
+
+            case Text:
+                setReceivedMessage(new String(payload, Charsets.UTF_8));
                 return true;
             }
 
@@ -544,12 +550,38 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
 
         if (message instanceof Message.TextMessage) {
             Message.TextMessage text = (Message.TextMessage) message;
-            setReceivedMessage(text.getPayload());
+            switch (expectedMessageType) {
+            case IntegerNumber:
+                try {
+                    Long number = Long.parseLong(text.getPayload());
+                    setReceivedMessage(String.valueOf(number));
+                    return true;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+
+            case FloatNumber:
+                try {
+                    Double number = Double.parseDouble(text.getPayload());
+                    setReceivedMessage(String.valueOf(number));
+                    return true;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+
+            case BinaryData:
+                setReceivedMessage(bytesToHexString(text.getPayload().getBytes(Charset.forName("utf-8"))));
+                return true;
+
+            case Text:
+                setReceivedMessage(text.getPayload());
+                return true;
+            }
+
             return true;
         }
 
         return false;
-
     }
 
     @Override

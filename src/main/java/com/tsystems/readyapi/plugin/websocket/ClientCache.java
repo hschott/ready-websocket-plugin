@@ -1,12 +1,7 @@
 package com.tsystems.readyapi.plugin.websocket;
 
-import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.codec.binary.Base64;
-import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
-import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 
@@ -26,37 +21,12 @@ public class ClientCache {
         map.clear();
     }
 
-    private ClientUpgradeRequest createClientUpgradeRequest(ExpandedConnectionParams connectionParams) throws Exception {
-        ClientUpgradeRequest upgradeRequest;
-        if (connectionParams == null)
-            upgradeRequest = getDefaultClientUpgradeRequest();
-        else {
-            upgradeRequest = new ClientUpgradeRequest();
-            if (connectionParams.hasCredentials()) {
-                String basicAuthHeader = new String(
-                        Base64.encodeBase64((connectionParams.login + ":" + connectionParams.password).getBytes()));
-                upgradeRequest.setHeader("Authorization", "Basic " + basicAuthHeader);
-            }
-            upgradeRequest.setRequestURI(new URI(connectionParams.getNormalizedServerUri()));
-            if (connectionParams.hasSubprotocols())
-                upgradeRequest.setSubProtocols(connectionParams.subprotocols.split(","));
-        }
-        return upgradeRequest;
-    }
-
     public Client get(String connectionName) {
         return map.get(connectionName);
     }
 
-    private ClientUpgradeRequest getDefaultClientUpgradeRequest() {
-        ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
-        return upgradeRequest;
-    }
-
     private Client register(String connectionName, ExpandedConnectionParams connectionParams) throws Exception {
-        WebSocketClient clientObj = new WebSocketClient();
-        clientObj.start();
-        Client newClient = new Client(clientObj, createClientUpgradeRequest(connectionParams));
+        Client newClient = new TyrusClient(connectionParams);
         map.put(connectionName, newClient);
         return newClient;
     }

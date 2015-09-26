@@ -117,7 +117,7 @@ public class PublishTestStep extends ConnectedTestStep {
 
         ExecutableTestStepResult result = new ExecutableTestStepResult(this);
         result.startTimer();
-        result.setStatus(TestStepResult.TestStepStatus.OK);
+        result.setStatus(TestStepResult.TestStepStatus.UNKNOWN);
         if (iconAnimator != null)
             iconAnimator.start();
         try {
@@ -150,11 +150,14 @@ public class PublishTestStep extends ConnectedTestStep {
 
                 if (!sendMessage(client, message, cancellationToken, result, maxTime))
                     return result;
+                else
+                    result.setStatus(TestStepResult.TestStepStatus.OK);
 
             } catch (Exception e) {
                 result.setStatus(TestStepResult.TestStepStatus.FAILED);
                 result.setError(e);
             }
+
             return result;
         } finally {
             result.stopTimer();

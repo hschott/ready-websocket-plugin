@@ -11,6 +11,7 @@ import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 import com.eviware.soapui.model.testsuite.TestStepResult;
 import com.eviware.soapui.monitor.TestMonitor;
 import com.eviware.soapui.plugins.auto.PluginTestStep;
+import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.xml.XmlObjectConfigurationReader;
 
@@ -60,16 +61,20 @@ public class DropConnectionTestStep extends ConnectedTestStep {
                     return result;
                 }
 
-                if (client.isConnected())
+                if (client.isConnected()) {
                     switch (dropMethod) {
                     case SendDisconnect:
                         client.disconnect(false);
+
                         break;
                     case Drop:
                         client.disconnect(true);
                         break;
                     }
-                else {
+
+                    result.setStatus(TestStepResult.TestStepStatus.OK);
+
+                } else {
                     result.addMessage("Already disconnected from the websocket server");
                     result.setStatus(TestStepResult.TestStepStatus.FAILED);
                 }
@@ -95,7 +100,7 @@ public class DropConnectionTestStep extends ConnectedTestStep {
             return "CANCELED";
         case FAILED:
             if (executionResult.getError() == null)
-                return "Unable to drop connection";
+                return "Unable to drop connection (" + StringUtils.join(executionResult.getMessages(), " ") + ")";
             else
                 return "Error during drop connection: " + Utils.getExceptionMessage(executionResult.getError());
         default:
@@ -160,7 +165,7 @@ public class DropConnectionTestStep extends ConnectedTestStep {
     }
 
     public enum DropMethod implements ConnectedTestStepPanel.UIOption {
-        SendDisconnect("Send Disconnect message to websocket server"), Drop("Close network connection");
+        SendDisconnect("Send Normal Close message"), Drop("Send Protocol Error message");
         private String title;
 
         DropMethod(String title) {

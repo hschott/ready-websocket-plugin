@@ -13,6 +13,10 @@ public abstract class Message<T> {
             buffer = payload != null ? ByteBuffer.wrap(payload) : null;
         }
 
+        public BinaryMessage(ByteBuffer buffer) {
+            this.buffer = buffer;
+        }
+
         public BinaryMessage(byte[] payload, int offset, int length) {
             buffer = payload != null ? ByteBuffer.wrap(payload, offset, length) : null;
         }
