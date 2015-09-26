@@ -49,6 +49,7 @@ public class TyrusClient extends Endpoint implements Client {
     private boolean proxySelectorWorkaround;
 
     public TyrusClient(ExpandedConnectionParams connectionParams) throws URISyntaxException {
+
         ClientEndpointConfig.Builder builder = ClientEndpointConfig.Builder.create();
 
         if (connectionParams.hasSubprotocols())
@@ -81,10 +82,12 @@ public class TyrusClient extends Endpoint implements Client {
             sslContextConfigurator.setKeyStoreFile(keyStoreUrl);
             sslContextConfigurator.setKeyStorePassword(pass);
             sslContextConfigurator.setKeyStoreType("JKS");
-            SslEngineConfigurator sslEngineConfigurator = new SslEngineConfigurator(sslContextConfigurator, true,
-                    false, false);
-
-            client.getProperties().put(ClientProperties.SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
+            if (sslContextConfigurator.validateConfiguration()) {
+                SslEngineConfigurator sslEngineConfigurator = new SslEngineConfigurator(sslContextConfigurator, true,
+                        false, false);
+                client.getProperties().put(ClientProperties.SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
+            } else
+                LOGGER.warn("error validating keystore configuration");
         }
 
         this.client = client;
