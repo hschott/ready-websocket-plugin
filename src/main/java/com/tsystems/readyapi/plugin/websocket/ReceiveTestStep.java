@@ -202,7 +202,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
 
                 Message<?> msg = null;
                 boolean failed = false;
-                while (System.nanoTime() <= maxTime && !cancellationToken.cancelled())
+                while (System.nanoTime() <= maxTime && !cancellationToken.isCancelled())
 
                     if ((msg = client.nextMessage()) != null) {
 
@@ -229,7 +229,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                     }
 
                 if (msg == null || failed)
-                    if (cancellationToken.cancelled())
+                    if (cancellationToken.isCancelled())
                         result.setStatus(TestStepResult.TestStepStatus.CANCELED);
                     else {
                         result.addMessage("The test step's timeout has expired");

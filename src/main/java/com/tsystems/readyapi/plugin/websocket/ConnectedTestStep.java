@@ -288,7 +288,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
     public TestStepResult run(final TestCaseRunner testRunner, TestCaseRunContext testRunContext) {
         return doExecute(testRunContext, new CancellationToken() {
             @Override
-            public boolean cancelled() {
+            public boolean isCancelled() {
                 return !testRunner.isRunning();
             }
         });
@@ -568,9 +568,9 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
     protected boolean waitInternal(Client client, CancellationToken cancellationToken,
             WsdlTestStepResult testStepResult, long maxTime, String errorText) {
         while ((!client.isAvailable() || !client.isConnected()) && !client.isFaulty()) {
-            boolean stopped = cancellationToken.cancelled();
-            if (stopped || maxTime != Long.MAX_VALUE && System.nanoTime() > maxTime) {
-                if (stopped) {
+            boolean cancelled = cancellationToken.isCancelled();
+            if (cancelled || maxTime != Long.MAX_VALUE && System.nanoTime() > maxTime) {
+                if (cancelled) {
                     testStepResult.setStatus(TestStepResult.TestStepStatus.CANCELED);
                     client.cancel();
                 } else {
@@ -579,11 +579,6 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                     testStepResult.setStatus(TestStepResult.TestStepStatus.FAILED);
                 }
                 return false;
-            }
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                //
             }
         }
         if (client.getThrowable() != null) {
