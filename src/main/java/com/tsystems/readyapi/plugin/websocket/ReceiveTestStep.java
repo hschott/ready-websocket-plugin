@@ -12,7 +12,6 @@ import java.nio.charset.CodingErrorAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
@@ -202,11 +201,10 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                 int connectAttemptCount = 0;
 
                 Message<?> msg = null;
-                Queue<Message<?>> messageQueue = client.getMessageQueue();
                 boolean failed = false;
                 while (System.nanoTime() <= maxTime && !cancellationToken.cancelled())
 
-                    if ((msg = messageQueue.poll()) != null) {
+                    if ((msg = client.nextMessage()) != null) {
 
                         if (!storeMessage(msg, result)) {
                             result.addMessage(String

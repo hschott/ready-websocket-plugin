@@ -1,6 +1,5 @@
 package com.tsystems.readyapi.plugin.websocket;
 
-import java.util.Queue;
 
 public interface Client {
 
@@ -12,7 +11,7 @@ public interface Client {
 
     public void dispose();
 
-    public Queue<Message<?>> getMessageQueue();
+    public Message<?> nextMessage();
 
     public Throwable getThrowable();
 

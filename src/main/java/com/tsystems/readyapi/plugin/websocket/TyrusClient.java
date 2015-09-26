@@ -183,8 +183,8 @@ public class TyrusClient extends Endpoint implements Client {
      * @see com.tsystems.readyapi.plugin.websocket.Client#getMessageQueue()
      */
     @Override
-    public Queue<Message<?>> getMessageQueue() {
-        return messageQueue;
+    public Message<?> nextMessage() {
+        return messageQueue.poll();
     }
 
     /**
