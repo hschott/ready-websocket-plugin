@@ -57,7 +57,7 @@ Check this option if the websocket server requires authentication.
 
 **Login** and **Password**
 
-These fields are required if the MQTT server requires authentication.
+These fields are required if the websocket server requires authentication.
 
 **Hide**
 
