@@ -3,12 +3,33 @@
 		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 		<modelVersion>4.0.0</modelVersion>
 
-		<name>Ready! API Websocket Plugin</name>
 		<artifactId>ready-websocket-plugin</artifactId>
 		<groupId>com.tsystems.readyapi.plugin.websocket</groupId>
 		<version>2.0.0-SNAPSHOT</version>
-		<repositories>
 
+		<name>Ready! API Websocket Plugin</name>
+		<description>A Ready! API plugin to run TestSteps against websockets</description>
+		<url>https://github.com/hschott/ready-websocket-plugin</url>
+		<developers>
+			<developer>
+				<name>Holger Balow-Schott</name>
+				<email>Holger.Balow-Schott@t-systems-mms.com</email>
+				<organizationUrl>https://github.com/hschott/ready-websocket-plugin</organizationUrl>
+				<timezone>+1</timezone>
+			</developer>
+		</developers>
+		<issueManagement>
+			<system>GitHub</system>
+			<url>https://github.com/hschott/ready-websocket-plugin/issues</url>
+		</issueManagement>
+		<licenses>
+			<license>
+				<name>The Apache License, Version 2.0</name>
+				<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			</license>
+		</licenses>
+
+		<repositories>
 				<repository>
 						<id>eviware</id>
 						<name>Eviware Maven2 Repository</name>
@@ -19,13 +40,15 @@
 						<name>Central Maven2 Repository</name>
 						<url>http://repo1.maven.org/maven2</url>
 				</repository>
-				<repository>
-						<id>paho</id>
-						<name>Paho Maven2 Repository</name>
-						<url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
-				</repository>
 		</repositories>
-
+		
+		<scm>
+			<connection>scm:git:git@github.com:hoschott/ready-websocket-plugin.git</connection>
+			<developerConnection>scm:git:git@github.com:hoschott/ready-websocket-plugin.git</developerConnection>
+			<url>https://github.com/hschott/ready-websocket-plugin.git</url>
+			<tag>HEAD</tag>
+		</scm>
+		
 		<dependencies>
 				<dependency>
 						<groupId>com.smartbear</groupId>
@@ -39,6 +62,11 @@
 						<version>1.12</version>
 				</dependency>
 		</dependencies>
+
+		<properties>
+			<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+			<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
+		</properties>
 
 		<build>
 				<sourceDirectory>src/main/java</sourceDirectory>
