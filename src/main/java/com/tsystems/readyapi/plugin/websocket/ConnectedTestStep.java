@@ -581,7 +581,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                 return false;
             }
         }
-        if (client.getThrowable() != null) {
+        if (client.isFaulty()) {
             testStepResult.addMessage(errorText);
             testStepResult.setError(client.getThrowable());
             testStepResult.setStatus(TestStepResult.TestStepStatus.FAILED);

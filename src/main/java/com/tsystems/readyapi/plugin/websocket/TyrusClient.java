@@ -120,6 +120,7 @@ public class TyrusClient extends Endpoint implements Client {
             checkProxySelector();
 
             throwable.set(null);
+            future.set(null);
 
             Future<Session> future = client.asyncConnectToServer(this, cec, uri);
             this.future.set(future);
@@ -172,6 +173,7 @@ public class TyrusClient extends Endpoint implements Client {
                 session.close();
             this.session.set(null);
             throwable.set(null);
+            future.set(null);
         } catch (Exception e) {
             LOGGER.error(e);
         }
@@ -254,25 +256,33 @@ public class TyrusClient extends Endpoint implements Client {
 
         this.session.set(null);
 
+        Future<?> future;
         if (closeReason.getCloseCode().getCode() > CloseCodes.NORMAL_CLOSURE.getCode())
-            throwable.set(new WebSocketException("Websocket connection closed.") {
+            throwable.set(websocketException("Websocket connection closed abnormaly.", closeReason));
+        else if ((future = this.future.get()) != null)
+            if (!future.isDone())
+                throwable.set(websocketException("Websocket connection closed unexpected.", closeReason));
+    }
 
-                @Override
-                public CloseReason getCloseReason() {
-                    return closeReason;
-                }
+    public WebSocketException websocketException(final String message, final CloseReason closeReason) {
+        return new WebSocketException(message) {
 
-                @Override
-                public String toString() {
-                    return getMessage()
-                            + " ["
-                            + closeReason.getCloseCode().getCode()
-                            + "] "
-                            + closeReason.getCloseCode()
-                            + (StringUtils.hasContent(closeReason.getReasonPhrase()) ? " '"
-                                    + closeReason.getReasonPhrase() + "' " : "");
-                }
-            });
+            @Override
+            public CloseReason getCloseReason() {
+                return closeReason;
+            }
+
+            @Override
+            public String toString() {
+                return getMessage()
+                        + " ["
+                        + closeReason.getCloseCode().getCode()
+                        + "] "
+                        + closeReason.getCloseCode()
+                        + (StringUtils.hasContent(closeReason.getReasonPhrase()) ? " '" + closeReason.getReasonPhrase()
+                                + "' " : "");
+            }
+        };
     }
 
     // FIXME: workaround https://java.net/jira/browse/TYRUS-412
@@ -327,6 +337,7 @@ public class TyrusClient extends Endpoint implements Client {
         Session session;
         if ((session = this.session.get()) != null) {
             throwable.set(null);
+            future.set(null);
             if (message instanceof Message.TextMessage) {
                 Message.TextMessage text = (Message.TextMessage) message;
                 future.set(session.getAsyncRemote().sendText(text.getPayload()));

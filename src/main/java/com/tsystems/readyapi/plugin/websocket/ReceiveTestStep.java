@@ -222,10 +222,14 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                         if (!failed)
                             break;
 
-                    } else if (!client.isConnected() && connectAttemptCount == 0) {
+                    } else if (!client.isFaulty() && !client.isConnected() && connectAttemptCount == 0) {
                         if (!waitForConnection(client, cancellationToken, result, maxTime))
                             return result;
                         ++connectAttemptCount;
+                    } else if (client.isFaulty()) {
+                        result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                        result.setError(client.getThrowable());
+                        return result;
                     }
 
                 if (msg == null || failed)

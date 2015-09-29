@@ -74,6 +74,11 @@ public class DropConnectionTestStep extends ConnectedTestStep {
 
                     result.setStatus(TestStepResult.TestStepStatus.OK);
 
+                } else if (client.isFaulty()) {
+                    result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                    result.setError(client.getThrowable());
+                    return result;
+
                 } else {
                     result.addMessage("Already disconnected from the websocket server");
                     result.setStatus(TestStepResult.TestStepStatus.FAILED);
