@@ -18,7 +18,7 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.client.ClientProperties;
@@ -56,12 +56,15 @@ public class TyrusClient extends Endpoint implements Client {
             builder.preferredSubprotocols(Arrays.asList(connectionParams.subprotocols.split(",")));
         cec = builder.build();
 
-        ClientManager client = ClientManager.createClient();
+        ClientManager client = ClientManager
+                .createClient("org.glassfish.tyrus.container.jdk.client.JdkClientContainer");
         client.setAsyncSendTimeout(-1);
         client.setDefaultMaxSessionIdleTimeout(-1);
 
         client.getProperties().put(ClientProperties.HANDSHAKE_TIMEOUT, Integer.MAX_VALUE);
         client.getProperties().put(ClientProperties.REDIRECT_ENABLED, Boolean.TRUE);
+        if (LOGGER.isTraceEnabled())
+            client.getProperties().put(ClientProperties.LOG_HTTP_UPGRADE, Boolean.TRUE);
 
         if (connectionParams.hasCredentials())
             client.getProperties().put(
@@ -128,7 +131,7 @@ public class TyrusClient extends Endpoint implements Client {
         } catch (Exception e) {
             Throwable th = ExceptionUtils.getRootCause(e);
             throwable.set(th != null ? th : e);
-            LOGGER.error(th != null ? th : e);
+            SoapUI.logError(th != null ? th : e);
         }
     }
 
@@ -248,7 +251,7 @@ public class TyrusClient extends Endpoint implements Client {
 
     @Override
     public void onClose(Session session, final CloseReason closeReason) {
-        LOGGER.info("WebSocketClose statusCode=" + closeReason.getCloseCode() + " reason="
+        SoapUI.log("WebSocketClose statusCode=" + closeReason.getCloseCode() + " reason="
                 + closeReason.getReasonPhrase());
         messageQueue.clear();
 
@@ -293,7 +296,7 @@ public class TyrusClient extends Endpoint implements Client {
 
     @Override
     public void onOpen(Session session, EndpointConfig config) {
-        LOGGER.info("WebSocketConnect success=" + session.isOpen() + " accepted protocol="
+        SoapUI.log("WebSocketConnect success=" + session.isOpen() + " accepted protocol="
                 + session.getNegotiatedSubprotocol());
         session.addMessageHandler(new MessageHandler.Whole<String>() {
 
@@ -320,7 +323,7 @@ public class TyrusClient extends Endpoint implements Client {
 
     @Override
     public void onError(Session session, Throwable cause) {
-        LOGGER.error("WebSocketError", cause);
+        SoapUI.logError(cause, "WebSocketError");
 
         resetProxySelector();
 

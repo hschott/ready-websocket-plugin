@@ -2,8 +2,6 @@ package com.tsystems.readyapi.plugin.websocket;
 
 import javax.swing.ImageIcon;
 
-import org.apache.log4j.Logger;
-
 import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.config.TestStepConfig;
 import com.eviware.soapui.impl.wsdl.support.IconAnimator;
@@ -29,7 +27,6 @@ public class PublishTestStep extends ConnectedTestStep {
 
     private final static String MESSAGE_TYPE_PROP_NAME = "MessageType";
     private final static String MESSAGE_PROP_NAME = "Message";
-    private final static Logger log = Logger.getLogger(PluginConfig.LOGGER_NAME);
     public final static PublishedMessageType DEFAULT_MESSAGE_TYPE = PublishedMessageType.Json;
 
     private static boolean actionGroupAdded = false;
@@ -164,7 +161,7 @@ public class PublishTestStep extends ConnectedTestStep {
             if (iconAnimator != null)
                 iconAnimator.stop();
             result.setOutcome(formOutcome(result));
-            log.info(String.format("%s - [%s test step]", result.getOutcome(), getName()));
+            SoapUI.log(String.format("%s - [%s test step]", result.getOutcome(), getName()));
             notifyExecutionListeners(result);
         }
     }

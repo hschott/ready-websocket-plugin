@@ -9,7 +9,7 @@
             <unpack>false</unpack>
             <outputDirectory>/lib</outputDirectory>
             <includes>
-                <include>org.glassfish.tyrus.bundles:tyrus-standalone-client:*</include>
+                <include>org.glassfish.tyrus.bundles:tyrus-standalone-client*:*</include>
             </includes>
         </dependencySet>
         <dependencySet>

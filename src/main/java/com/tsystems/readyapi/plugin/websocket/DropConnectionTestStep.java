@@ -95,6 +95,7 @@ public class DropConnectionTestStep extends ConnectedTestStep {
             if (iconAnimator != null)
                 iconAnimator.stop();
             result.setOutcome(formOutcome(result));
+            SoapUI.log(String.format("%s - [%s test step]", result.getOutcome(), getName()));
             notifyExecutionListeners(result);
         }
     }

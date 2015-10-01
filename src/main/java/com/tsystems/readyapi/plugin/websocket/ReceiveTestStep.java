@@ -67,7 +67,6 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     private final static String RECEIVED_MESSAGE_PROP_NAME = "ReceivedMessage";
     private final static String ASSERTION_SECTION = "assertion";
 
-    private final static Logger log = Logger.getLogger(PluginConfig.LOGGER_NAME);
     private static boolean actionGroupAdded = false;
 
     private MessageType expectedMessageType = MessageType.Text;
@@ -266,7 +265,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                 }
             }
             result.setOutcome(formOutcome(result));
-            log.info(String.format("%s - [%s test step]", result.getOutcome(), getName()));
+            SoapUI.log(String.format("%s - [%s test step]", result.getOutcome(), getName()));
             notifyExecutionListeners(result);
         }
 
