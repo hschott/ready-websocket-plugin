@@ -11,7 +11,7 @@ It integrates fully with all other Ready! API features like property expansion, 
 
 Install the plugin via the Plugin Manager inside Ready! API.
 
-This plugin also runs with SoapUI 5.2. Install it by copying it to <users home>/.soapuios/plugins/ .
+This plugin also runs with SoapUI 5.2. Install it by copying it to `<user home>/.soapuios/plugins/` .
 
 This plugin was inspired by [SmartBear/ready-mqtt-plugin](https://github.com/SmartBear/ready-mqtt-plugin) and lots of code has been taken from it.
 Thanks to the original authors.
