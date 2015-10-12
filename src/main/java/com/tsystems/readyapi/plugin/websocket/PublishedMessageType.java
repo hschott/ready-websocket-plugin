@@ -1,11 +1,11 @@
 package com.tsystems.readyapi.plugin.websocket;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
-import com.eviware.soapui.model.project.Project;
 import org.apache.commons.io.FileUtils;
+
+import com.eviware.soapui.model.project.Project;
 
 enum PublishedMessageType {
     Json("JSON"), Xml("XML"), Text("Text"), BinaryFile("Content of file"), IntegerValue("Integer (4 bytes)"), LongValue(
@@ -92,12 +92,12 @@ enum PublishedMessageType {
             if (!file.isAbsolute())
                 file = new File(new File(project.getPath()).getParent(), file.getPath());
             if (!file.exists())
-                throw new IllegalArgumentException(String.format(
-                        "Unable to find \"%s\" file which contains a message", file.getPath()));
+                throw new IllegalArgumentException(String.format("Unable to find \"%s\" file which contains a message",
+                        file.getPath()));
             try {
                 return new Message.BinaryMessage(FileUtils.readFileToByteArray(file));
 
-            } catch (RuntimeException | IOException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(String.format(
                         "Attempt of access to \"%s\" file with a published message has failed.", file.getPath()), e);
             }
