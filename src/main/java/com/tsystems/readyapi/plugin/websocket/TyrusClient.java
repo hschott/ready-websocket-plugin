@@ -1,5 +1,6 @@
 package com.tsystems.readyapi.plugin.websocket;
 
+import java.io.IOException;
 import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -173,7 +174,11 @@ public class TyrusClient extends Endpoint implements Client {
         try {
             Session session;
             if ((session = this.session.get()) != null)
-                session.close();
+                try {
+                    session.close();
+                } catch (IOException e) {
+                    LOGGER.warn("Couldn't close session", e);
+                }
             this.session.set(null);
             throwable.set(null);
             future.set(null);
