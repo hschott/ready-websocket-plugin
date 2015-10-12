@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import com.eviware.soapui.model.project.Project;
+import org.apache.commons.io.FileUtils;
 
 enum PublishedMessageType {
     Json("JSON"), Xml("XML"), Text("Text"), BinaryFile("Content of file"), IntegerValue("Integer (4 bytes)"), LongValue(
@@ -87,20 +88,14 @@ enum PublishedMessageType {
             return new Message.BinaryMessage(buf);
 
         case BinaryFile:
-            File file = null;
+            File file = new File(payload);
+            if (!file.isAbsolute())
+                file = new File(new File(project.getPath()).getParent(), file.getPath());
+            if (!file.exists())
+                throw new IllegalArgumentException(String.format(
+                        "Unable to find \"%s\" file which contains a message", file.getPath()));
             try {
-                file = new File(payload);
-                if (!file.isAbsolute())
-                    file = new File(new File(project.getPath()).getParent(), file.getPath());
-                if (!file.exists())
-                    throw new IllegalArgumentException(String.format(
-                            "Unable to find \"%s\" file which contains a message", file.getPath()));
-                int fileLen = (int) file.length();
-                buf = new byte[fileLen];
-                FileInputStream stream = new FileInputStream(file);
-                stream.read(buf);
-                stream.close();
-                return new Message.BinaryMessage(buf);
+                return new Message.BinaryMessage(FileUtils.readFileToByteArray(file));
 
             } catch (RuntimeException | IOException e) {
                 throw new RuntimeException(String.format(
