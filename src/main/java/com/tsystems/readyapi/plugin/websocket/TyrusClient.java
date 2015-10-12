@@ -171,20 +171,16 @@ public class TyrusClient extends Endpoint implements Client {
     public void dispose() {
         resetProxySelector();
 
-        try {
-            Session session;
-            if ((session = this.session.get()) != null)
-                try {
-                    session.close();
-                } catch (IOException e) {
-                    LOGGER.warn("Couldn't close session", e);
-                }
-            this.session.set(null);
-            throwable.set(null);
-            future.set(null);
-        } catch (Exception e) {
-            LOGGER.error(e);
-        }
+        Session session;
+        if ((session = this.session.get()) != null)
+            try {
+                session.close();
+            } catch (IOException e) {
+                LOGGER.warn("Couldn't close session", e);
+            }
+        this.session.set(null);
+        throwable.set(null);
+        future.set(null);
     }
 
     /**
