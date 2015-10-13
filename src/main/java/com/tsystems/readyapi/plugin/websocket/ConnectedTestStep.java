@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingUtilities;
 
@@ -298,7 +299,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
             WsdlTestStepResult testStepResult, long maxTime) {
         long timeout;
         if (maxTime == Long.MAX_VALUE)
-            timeout = 0;
+            timeout = -1;
         else {
             timeout = maxTime - System.nanoTime();
             if (timeout <= 0) {
@@ -307,7 +308,12 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                 return false;
             }
         }
-        client.sendMessage(message);
+
+        if (timeout <= -1)
+            client.sendMessage(message, timeout);
+        else
+            client.sendMessage(message, TimeUnit.NANOSECONDS.toMillis(timeout));
+
         return waitInternal(client, cancellationToken, testStepResult, maxTime,
                 "Unable send message to websocket server.");
     }
@@ -560,7 +566,11 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                 return false;
             }
         }
-        client.connect();
+        if (timeout <= 0)
+            client.connect(timeout);
+        else
+            client.connect(TimeUnit.NANOSECONDS.toMillis(timeout));
+
         return waitInternal(client, cancellationToken, testStepResult, maxTime,
                 "Unable connect to the websocket server.");
     }
@@ -579,6 +589,11 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                     testStepResult.setStatus(TestStepResult.TestStepStatus.FAILED);
                 }
                 return false;
+            }
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
         if (client.isFaulty()) {

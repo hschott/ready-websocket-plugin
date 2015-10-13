@@ -17,6 +17,7 @@ import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
+import javax.websocket.RemoteEndpoint.Async;
 import javax.websocket.Session;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -59,10 +60,8 @@ public class TyrusClient extends Endpoint implements Client {
 
         ClientManager client = ClientManager
                 .createClient("org.glassfish.tyrus.container.jdk.client.JdkClientContainer");
-        client.setAsyncSendTimeout(-1);
         client.setDefaultMaxSessionIdleTimeout(-1);
 
-        client.getProperties().put(ClientProperties.HANDSHAKE_TIMEOUT, Integer.MAX_VALUE);
         client.getProperties().put(ClientProperties.REDIRECT_ENABLED, Boolean.TRUE);
         if (LOGGER.isTraceEnabled())
             client.getProperties().put(ClientProperties.LOG_HTTP_UPGRADE, Boolean.TRUE);
@@ -100,7 +99,6 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * Explain why this is overridden.
      * 
      * @see com.tsystems.readyapi.plugin.websocket.Client#cancel()
      */
@@ -112,12 +110,11 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * Explain why this is overridden.
      * 
-     * @see com.tsystems.readyapi.plugin.websocket.Client#connect()
+     * @see com.tsystems.readyapi.plugin.websocket.Client#connect(long)
      */
     @Override
-    public void connect() {
+    public void connect(long timeoutMillis) {
         if (isConnected())
             return;
         try {
@@ -125,6 +122,11 @@ public class TyrusClient extends Endpoint implements Client {
 
             throwable.set(null);
             future.set(null);
+
+            if (timeoutMillis <= 0)
+                client.getProperties().put(ClientProperties.HANDSHAKE_TIMEOUT, Integer.MAX_VALUE);
+            else
+                client.getProperties().put(ClientProperties.HANDSHAKE_TIMEOUT, (int) timeoutMillis);
 
             Future<Session> future = client.asyncConnectToServer(this, cec, uri);
             this.future.set(future);
@@ -146,7 +148,6 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * Explain why this is overridden.
      * 
      * @see com.tsystems.readyapi.plugin.websocket.Client#disconnect(boolean)
      */
@@ -163,7 +164,6 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * Explain why this is overridden.
      * 
      * @see com.tsystems.readyapi.plugin.websocket.Client#dispose()
      */
@@ -184,7 +184,6 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * Explain why this is overridden.
      * 
      * @see com.tsystems.readyapi.plugin.websocket.Client#getMessageQueue()
      */
@@ -194,7 +193,6 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * Explain why this is overridden.
      * 
      * @see com.tsystems.readyapi.plugin.websocket.Client#getThrowable()
      */
@@ -204,7 +202,6 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * Explain why this is overridden.
      * 
      * @see com.tsystems.readyapi.plugin.websocket.Client#isAvailable()
      */
@@ -227,7 +224,6 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * Explain why this is overridden.
      * 
      * @see com.tsystems.readyapi.plugin.websocket.Client#isConnected()
      */
@@ -241,7 +237,6 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * Explain why this is overridden.
      * 
      * @see com.tsystems.readyapi.plugin.websocket.Client#isFaulty()
      */
@@ -332,23 +327,26 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * Explain why this is overridden.
      * 
-     * @see com.tsystems.readyapi.plugin.websocket.Client#sendMessage(com.tsystems.readyapi.plugin.websocket.Message)
+     * @see com.tsystems.readyapi.plugin.websocket.Client#sendMessage(com.tsystems.readyapi.plugin.websocket.Message,long)
      */
     @Override
-    public void sendMessage(Message<?> message) {
+    public void sendMessage(Message<?> message, long timeoutMillis) {
         Session session;
         if ((session = this.session.get()) != null) {
             throwable.set(null);
             future.set(null);
+
+            Async asyncRemote = session.getAsyncRemote();
+            asyncRemote.setSendTimeout(timeoutMillis);
+
             if (message instanceof Message.TextMessage) {
                 Message.TextMessage text = (Message.TextMessage) message;
-                future.set(session.getAsyncRemote().sendText(text.getPayload()));
+                future.set(asyncRemote.sendText(text.getPayload()));
             }
             if (message instanceof Message.BinaryMessage) {
                 Message.BinaryMessage binary = (Message.BinaryMessage) message;
-                future.set(session.getAsyncRemote().sendBinary(binary.getPayload()));
+                future.set(asyncRemote.sendBinary(binary.getPayload()));
             }
         }
     }

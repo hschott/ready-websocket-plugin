@@ -1,11 +1,10 @@
 package com.tsystems.readyapi.plugin.websocket;
 
-
 public interface Client {
 
     public void cancel();
 
-    public void connect();
+    public void connect(long timeoutMillis);
 
     public void disconnect(boolean harshDisconnect) throws Exception;
 
@@ -21,6 +20,6 @@ public interface Client {
 
     public boolean isFaulty();
 
-    public void sendMessage(Message<?> message);
+    public void sendMessage(Message<?> message, long timeoutMillis);
 
 }
