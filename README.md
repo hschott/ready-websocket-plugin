@@ -35,6 +35,14 @@ This plugin allows publish messages to websocket servers and receive messages fr
 * Receive Websockets Message – to receive a message
 * Drop Websocket connection – to close or terminate a connection with websocket server
 
+### Lifetime of Websocket connections
+
+Websockets are full-duplex (both directions at the same time) single tcp socket connections. Publishing and receiving messages can be done on one connection. That's where the TestCase comes into account. A TestCase bundles TestSteps and for Websocket TestSteps it is the place where open websocket connections are cached.
+Each Websocket TestStep looks into the cache for a named connection. If an open websocket connection could be found it will be used for communication. If no open websocket connection could be found, a new one will be opend and cached. Once the TestCase has ended all open websocket connections will be closed.
+
+Caching and re-using of open websocket connections only happens when you run a TestCase. When running a single Websocket TestStep it's websocket connection will not be cached for re-use.
+
+
 ### Configure Websocket connections 
 
 Before you start, you have to specify the websocket server which you want to use and configure the connection settings.
