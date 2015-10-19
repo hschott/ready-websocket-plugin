@@ -9,12 +9,23 @@ This plugin adds three TestSteps to the functional testing in Ready! API
 
 It integrates fully with all other Ready! API features like property expansion, property transfers, data-driven testing, etc.
 
-Install the plugin via the Plugin Manager inside Ready! API.
-
-This plugin also runs with SoapUI 5.2. Install it by copying it to `<user home>/.soapuios/plugins/` .
-
 This plugin was inspired by [SmartBear/ready-mqtt-plugin](https://github.com/SmartBear/ready-mqtt-plugin) and lots of code has been taken from it.
 Thanks to the original authors.
+
+## Requirements and Installation
+
+This plugin is compatible and works with:
+* SoapUI 5.2.x
+* Ready! API 1.4.x
+
+### Install in SoapUI
+
+Download the latest release JAR file and copy it to `<user home>/.soapuios/plugins/` .
+For further question please read [SoapUI Plugin Installation](http://www.soapui.org/extension-plugins/install.html)
+
+### Install in Ready! API
+
+Install the plugin via the Plugin Manager inside Ready! API. Please read [Ready! API Plugin Manager](http://readyapi.smartbear.com/readyapi/plugins/manager/start) for additional informations.
 
 ## Websocket Test Steps
 
