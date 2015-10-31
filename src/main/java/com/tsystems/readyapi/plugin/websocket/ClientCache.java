@@ -4,8 +4,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
+import com.eviware.soapui.model.testsuite.TestRunContext;
 
 public class ClientCache {
+    private static final String CLIENT_CACHE_PROPNAME = "client_cache";
+
     private Map<String, Client> map = new ConcurrentHashMap<String, Client>();
 
     public Client add(String connectionName, ExpandedConnectionParams params) throws Exception {
@@ -15,7 +18,11 @@ public class ClientCache {
         return result;
     }
 
-    public void assureFinalized() {
+    public static void assureFinalized(PropertyExpansionContext testRunContext) {
+        lazyCache(testRunContext).assureFinalized();
+    }
+
+    private void assureFinalized() {
         for (Client client : map.values())
             client.dispose();
         map.clear();
@@ -31,14 +38,23 @@ public class ClientCache {
         return newClient;
     }
 
-    static ClientCache getCache(PropertyExpansionContext testRunContext) {
-        final String CLIENT_CACHE_PROPNAME = "client_cache";
-        ClientCache cache = (ClientCache) testRunContext.getProperty(CLIENT_CACHE_PROPNAME);
-        if (cache == null) {
-            cache = new ClientCache();
-            testRunContext.setProperty(CLIENT_CACHE_PROPNAME, cache);
+    public static ClientCache getCache(PropertyExpansionContext testRunContext) {
+
+        PropertyExpansionContext cacheContext = testRunContext.hasProperty(TestRunContext.LOAD_TEST_CONTEXT) ? (PropertyExpansionContext) testRunContext
+                .getProperty(TestRunContext.LOAD_TEST_CONTEXT) : testRunContext;
+
+        return lazyCache(cacheContext);
+    }
+
+    private static ClientCache lazyCache(PropertyExpansionContext cacheContext) {
+        ClientCache cache;
+        synchronized (cacheContext) {
+            cache = (ClientCache) cacheContext.getProperty(CLIENT_CACHE_PROPNAME);
+            if (cache == null) {
+                cache = new ClientCache();
+                cacheContext.setProperty(CLIENT_CACHE_PROPNAME, cache);
+            }
         }
         return cache;
     }
-
 }

@@ -37,6 +37,7 @@ import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.iface.MessageExchange;
 import com.eviware.soapui.model.iface.Operation;
 import com.eviware.soapui.model.iface.Response;
+import com.eviware.soapui.model.iface.SubmitContext;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 import com.eviware.soapui.model.support.DefaultTestStepProperty;
 import com.eviware.soapui.model.support.TestStepBeanProperty;
@@ -89,7 +90,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
             SoapUI.getActionRegistry().addActionGroup(new ReceiveTestStepActionGroup());
             actionGroupAdded = true;
         }
-        if (config != null && config.getConfig() != null) {
+        if ((config != null) && (config.getConfig() != null)) {
             XmlObjectConfigurationReader reader = new XmlObjectConfigurationReader(config.getConfig());
             readData(reader);
         }
@@ -202,7 +203,6 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                 Message<?> msg = null;
                 boolean failed = false;
                 while (System.nanoTime() <= maxTime && !cancellationToken.isCancelled())
-
                     if ((msg = client.nextMessage()) != null) {
 
                         if (!storeMessage(msg, result)) {
@@ -231,16 +231,18 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                         return result;
                     }
 
-                if (msg == null || failed)
+                if (msg == null || failed) {
                     if (cancellationToken.isCancelled())
                         result.setStatus(TestStepResult.TestStepStatus.CANCELED);
                     else {
                         result.addMessage("The test step's timeout has expired");
                         result.setStatus(TestStepResult.TestStepStatus.FAILED);
                     }
-                else
+                } else {
                     result.setStatus(TestStepResult.TestStepStatus.OK);
-
+                    if (msg != null)
+                        result.setSize(msg.size());
+                }
             } catch (Exception e) {
                 result.setError(e);
                 result.setStatus(TestStepResult.TestStepStatus.FAILED);
@@ -272,7 +274,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     }
 
     @Override
-    public ExecutableTestStepResult execute(PropertyExpansionContext runContext, CancellationToken cancellationToken) {
+    public ExecutableTestStepResult execute(SubmitContext runContext, CancellationToken cancellationToken) {
         updateState();
         try {
             return doExecute(runContext, cancellationToken);
@@ -616,7 +618,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
         if (iconAnimator == null)
             return;
         TestMonitor testMonitor = SoapUI.getTestMonitor();
-        if (testMonitor != null
+        if ((testMonitor != null)
                 && (testMonitor.hasRunningLoadTest(getTestStep().getTestCase()) || testMonitor
                         .hasRunningSecurityTest(getTestStep().getTestCase())))
             setIcon(disabledStepIcon);

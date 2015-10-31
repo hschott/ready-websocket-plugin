@@ -14,6 +14,7 @@ import com.eviware.soapui.config.TestStepConfig;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStepResult;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStepWithProperties;
+import com.eviware.soapui.model.iface.SubmitContext;
 import com.eviware.soapui.model.project.Project;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 import com.eviware.soapui.model.support.DefaultTestStepProperty;
@@ -30,13 +31,14 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
 
     final static String SERVER_URI_PROP_NAME = "ServerURI";
     final static String SUB_PROTOCOLS_PROP_NAME = "SubProtocols";
-
     final static String LOGIN_PROP_NAME = "Login";
     final static String PASSWORD_PROP_NAME = "Password";
     final static String CONNECTION_NAME_PROP_NAME = "ConnectionName";
-    protected final static String TIMEOUT_PROP_NAME = "Timeout";
-    private final static String TIMEOUT_MEASURE_PROP_NAME = "TimeoutMeasure";
-    private final static String TIMEOUT_EXPIRED_MSG = "The test step's timeout has expired.";
+
+    final static String TIMEOUT_PROP_NAME = "Timeout";
+    final static String TIMEOUT_MEASURE_PROP_NAME = "TimeoutMeasure";
+    final static String TIMEOUT_EXPIRED_MSG = "The test step's timeout has expired.";
+
     private Connection connection;
 
     private ArrayList<ExecutionListener> executionListeners;
@@ -132,8 +134,8 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
         return false;
     }
 
-    protected void cleanAfterExecution(PropertyExpansionContext runContext) {
-        ClientCache.getCache(runContext).assureFinalized();
+    protected void cleanAfterExecution(SubmitContext runContext) {
+        ClientCache.assureFinalized(runContext);
     }
 
     protected abstract ExecutableTestStepResult doExecute(PropertyExpansionContext testRunContext,
@@ -293,29 +295,6 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                 return !testRunner.isRunning();
             }
         });
-    }
-
-    protected boolean sendMessage(Client client, Message<?> message, CancellationToken cancellationToken,
-            WsdlTestStepResult testStepResult, long maxTime) {
-        long timeout;
-        if (maxTime == Long.MAX_VALUE)
-            timeout = -1;
-        else {
-            timeout = maxTime - System.nanoTime();
-            if (timeout <= 0) {
-                testStepResult.addMessage(TIMEOUT_EXPIRED_MSG);
-                testStepResult.setStatus(TestStepResult.TestStepStatus.FAILED);
-                return false;
-            }
-        }
-
-        if (timeout <= -1)
-            client.sendMessage(message, timeout);
-        else
-            client.sendMessage(message, TimeUnit.NANOSECONDS.toMillis(timeout));
-
-        return waitInternal(client, cancellationToken, testStepResult, maxTime,
-                "Unable send message to websocket server.");
     }
 
     protected void setBooleanProperty(String propName, String publishedPropName, boolean value) {

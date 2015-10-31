@@ -1,10 +1,13 @@
 package com.tsystems.readyapi.plugin.websocket;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 public abstract class Message<T> {
 
     public abstract T getPayload();
+
+    public abstract long size();
 
     public static class BinaryMessage extends Message<ByteBuffer> {
         public ByteBuffer buffer;
@@ -25,6 +28,11 @@ public abstract class Message<T> {
         public ByteBuffer getPayload() {
             return buffer;
         }
+
+        @Override
+        public long size() {
+            return buffer.capacity();
+        }
     }
 
     public static class TextMessage extends Message<String> {
@@ -37,6 +45,11 @@ public abstract class Message<T> {
         @Override
         public String getPayload() {
             return payload;
+        }
+
+        @Override
+        public long size() {
+            return payload.getBytes(Charset.forName("UTF-8")).length;
         }
     }
 }

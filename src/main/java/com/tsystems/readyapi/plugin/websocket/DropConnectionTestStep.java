@@ -7,6 +7,7 @@ import com.eviware.soapui.config.TestStepConfig;
 import com.eviware.soapui.impl.wsdl.support.IconAnimator;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStepResult;
+import com.eviware.soapui.model.iface.SubmitContext;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 import com.eviware.soapui.model.testsuite.TestStepResult;
 import com.eviware.soapui.monitor.TestMonitor;
@@ -116,7 +117,7 @@ public class DropConnectionTestStep extends ConnectedTestStep {
     }
 
     @Override
-    public ExecutableTestStepResult execute(PropertyExpansionContext runContext, CancellationToken cancellationToken) {
+    public ExecutableTestStepResult execute(SubmitContext runContext, CancellationToken cancellationToken) {
         updateState();
         try {
             return doExecute(runContext, cancellationToken);
