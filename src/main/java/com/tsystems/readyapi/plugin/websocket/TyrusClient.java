@@ -27,6 +27,7 @@ import org.glassfish.tyrus.client.ClientProperties;
 import org.glassfish.tyrus.client.SslContextConfigurator;
 import org.glassfish.tyrus.client.SslEngineConfigurator;
 import org.glassfish.tyrus.client.auth.Credentials;
+import org.glassfish.tyrus.core.TyrusSession;
 import org.glassfish.tyrus.core.WebSocketException;
 
 import com.btr.proxy.selector.direct.NoProxySelector;
@@ -294,6 +295,9 @@ public class TyrusClient extends Endpoint implements Client {
     public void onOpen(Session session, EndpointConfig config) {
         SoapUI.log("WebSocketConnect success=" + session.isOpen() + " accepted protocol="
                 + session.getNegotiatedSubprotocol());
+
+        ((TyrusSession) session).setHeartbeatInterval(30000);
+
         session.addMessageHandler(new MessageHandler.Whole<String>() {
 
             @Override
