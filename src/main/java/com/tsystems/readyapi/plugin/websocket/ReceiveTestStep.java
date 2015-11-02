@@ -198,12 +198,13 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                 long starTime = System.nanoTime();
                 long maxTime = getTimeout() == 0 ? Long.MAX_VALUE : starTime + (long) getTimeout() * 1000 * 1000;
 
-                int connectAttemptCount = 0;
+                if (!waitForConnection(client, cancellationToken, result, maxTime))
+                    return result;
 
                 Message<?> msg = null;
                 boolean failed = false;
                 while (System.nanoTime() <= maxTime && !cancellationToken.isCancelled())
-                    if ((msg = client.nextMessage()) != null) {
+                    if ((msg = client.nextMessage(10)) != null) {
 
                         if (!storeMessage(msg, result)) {
                             result.addMessage(String
@@ -221,13 +222,12 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                         if (!failed)
                             break;
 
-                    } else if (!client.isFaulty() && !client.isConnected() && connectAttemptCount == 0) {
-                        if (!waitForConnection(client, cancellationToken, result, maxTime))
-                            return result;
-                        ++connectAttemptCount;
                     } else if (client.isFaulty()) {
                         result.setStatus(TestStepResult.TestStepStatus.FAILED);
                         result.setError(client.getThrowable());
+                        return result;
+                    } else if (!client.isConnected()) {
+                        result.setStatus(TestStepResult.TestStepStatus.CANCELED);
                         return result;
                     }
 

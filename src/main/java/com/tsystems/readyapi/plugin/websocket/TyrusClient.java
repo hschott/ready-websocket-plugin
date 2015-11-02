@@ -6,9 +6,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.websocket.ClientEndpointConfig;
@@ -42,7 +43,7 @@ public class TyrusClient extends Endpoint implements Client {
 
     private AtomicReference<Session> session = new AtomicReference<Session>();
     private AtomicReference<Throwable> throwable = new AtomicReference<Throwable>();
-    private Queue<Message<?>> messageQueue = new LinkedBlockingQueue<Message<?>>();
+    private BlockingQueue<Message<?>> messageQueue = new LinkedBlockingQueue<Message<?>>();
     private AtomicReference<Future<?>> future = new AtomicReference<Future<?>>();
 
     private ClientEndpointConfig cec;
@@ -186,11 +187,16 @@ public class TyrusClient extends Endpoint implements Client {
 
     /**
      * 
-     * @see com.tsystems.readyapi.plugin.websocket.Client#getMessageQueue()
+     * @see com.tsystems.readyapi.plugin.websocket.Client#nextMessage(long)
      */
     @Override
-    public Message<?> nextMessage() {
-        return messageQueue.poll();
+    public Message<?> nextMessage(long timeoutMillis) {
+        try {
+            return messageQueue.poll(timeoutMillis, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
+        }
     }
 
     /**

@@ -10,7 +10,7 @@ public interface Client {
 
     public void dispose();
 
-    public Message<?> nextMessage();
+    public Message<?> nextMessage(long timeoutMillis);
 
     public Throwable getThrowable();
 
