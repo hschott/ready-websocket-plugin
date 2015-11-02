@@ -1,5 +1,7 @@
 package com.tsystems.readyapi.plugin.websocket;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.swing.ImageIcon;
 
 import com.eviware.soapui.SoapUI;
@@ -7,6 +9,7 @@ import com.eviware.soapui.config.TestStepConfig;
 import com.eviware.soapui.impl.wsdl.support.IconAnimator;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStepResult;
+import com.eviware.soapui.model.iface.SubmitContext;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 import com.eviware.soapui.model.support.DefaultTestStepProperty;
 import com.eviware.soapui.model.support.TestStepBeanProperty;
@@ -167,7 +170,7 @@ public class PublishTestStep extends ConnectedTestStep {
     }
 
     @Override
-    public ExecutableTestStepResult execute(PropertyExpansionContext runContext, CancellationToken cancellationToken) {
+    public ExecutableTestStepResult execute(SubmitContext runContext, CancellationToken cancellationToken) {
         updateState();
         try {
             return doExecute(runContext, cancellationToken);
@@ -218,6 +221,31 @@ public class PublishTestStep extends ConnectedTestStep {
             messageKind = DEFAULT_MESSAGE_TYPE;
         }
         message = reader.readString(MESSAGE_SETTING_NAME, "");
+    }
+
+    protected boolean sendMessage(Client client, Message<?> message, CancellationToken cancellationToken,
+            WsdlTestStepResult testStepResult, long maxTime) {
+        long timeout;
+        if (maxTime == Long.MAX_VALUE)
+            timeout = -1;
+        else {
+            timeout = maxTime - System.nanoTime();
+            if (timeout <= 0) {
+                testStepResult.addMessage(TIMEOUT_EXPIRED_MSG);
+                testStepResult.setStatus(TestStepResult.TestStepStatus.FAILED);
+                return false;
+            }
+        }
+
+        if (timeout <= -1)
+            client.sendMessage(message, timeout);
+        else
+            client.sendMessage(message, TimeUnit.NANOSECONDS.toMillis(timeout));
+
+        testStepResult.setSize(message.size());
+
+        return waitInternal(client, cancellationToken, testStepResult, maxTime,
+                "Unable send message to websocket server.");
     }
 
     public void setMessage(String value) {
