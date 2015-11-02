@@ -55,6 +55,7 @@ public class PublishTestStepPanel extends ConnectedTestStepPanel<PublishTestStep
     private JInspectorPanel inspectorPanel;
     private JComponentInspector<JComponent> logInspector;
     private JLogList logArea;
+    private RunTestStepAction startAction;
 
     public PublishTestStepPanel(PublishTestStep modelItem) {
         super(modelItem);
@@ -156,7 +157,7 @@ public class PublishTestStepPanel extends ConnectedTestStepPanel<PublishTestStep
 
     private JComponent buildToolbar() {
         JXToolBar toolBar = UISupport.createToolbar();
-        RunTestStepAction startAction = new RunTestStepAction(getModelItem());
+        startAction = new RunTestStepAction(getModelItem());
         JButton submitButton = UISupport.createActionButton(startAction, startAction.isEnabled());
         toolBar.add(submitButton);
         submitButton.setMnemonic(KeyEvent.VK_ENTER);
@@ -208,6 +209,7 @@ public class PublishTestStepPanel extends ConnectedTestStepPanel<PublishTestStep
 
     @Override
     protected boolean release() {
+        startAction.cancel();
         getModelItem().removeExecutionListener(this);
         inspectorPanel.release();
         if (jsonTreeEditor != null)

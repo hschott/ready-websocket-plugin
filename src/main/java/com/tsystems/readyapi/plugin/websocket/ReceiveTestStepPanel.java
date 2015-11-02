@@ -60,6 +60,7 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
     private JComponentInspector<JComponent> logInspector;
 
     private JLogList logArea;
+    private RunTestStepAction startAction;
 
     public ReceiveTestStepPanel(ReceiveTestStep modelItem) {
         super(modelItem);
@@ -192,7 +193,7 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
 
     private JComponent buildToolbar() {
         JXToolBar toolBar = UISupport.createToolbar();
-        RunTestStepAction startAction = new RunTestStepAction(getModelItem());
+        startAction = new RunTestStepAction(getModelItem());
         JButton submitButton = UISupport.createActionButton(startAction, startAction.isEnabled());
         toolBar.add(submitButton);
         submitButton.setMnemonic(KeyEvent.VK_ENTER);
@@ -232,6 +233,7 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
 
     @Override
     public boolean release() {
+        startAction.cancel();
         getModelItem().removeExecutionListener(this);
         getModelItem().removeAssertionsListener(this);
         assertionsPanel.release();
