@@ -23,22 +23,18 @@ import org.apache.xmlbeans.XmlObject;
 import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.config.TestAssertionConfig;
 import com.eviware.soapui.config.TestStepConfig;
+import com.eviware.soapui.impl.wsdl.WsdlSubmitContext;
+import com.eviware.soapui.impl.wsdl.support.AbstractNonHttpMessageExchange;
 import com.eviware.soapui.impl.wsdl.support.IconAnimator;
 import com.eviware.soapui.impl.wsdl.support.assertions.AssertableConfig;
 import com.eviware.soapui.impl.wsdl.support.assertions.AssertionsSupport;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
-import com.eviware.soapui.impl.wsdl.testcase.WsdlTestRunContext;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlMessageAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStepResult;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.TestAssertionRegistry;
-import com.eviware.soapui.model.ModelItem;
-import com.eviware.soapui.model.iface.Attachment;
 import com.eviware.soapui.model.iface.Interface;
-import com.eviware.soapui.model.iface.MessageExchange;
-import com.eviware.soapui.model.iface.Operation;
 import com.eviware.soapui.model.iface.Response;
 import com.eviware.soapui.model.iface.SubmitContext;
-import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 import com.eviware.soapui.model.support.DefaultTestStepProperty;
 import com.eviware.soapui.model.support.TestStepBeanProperty;
 import com.eviware.soapui.model.testsuite.Assertable;
@@ -52,8 +48,6 @@ import com.eviware.soapui.monitor.TestMonitor;
 import com.eviware.soapui.plugins.auto.PluginTestStep;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
-import com.eviware.soapui.support.types.StringToStringMap;
-import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.soapui.support.xml.XmlObjectConfigurationReader;
 import com.google.common.base.Charsets;
 
@@ -83,6 +77,8 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     private ImageIcon disabledStepIcon;
     private ImageIcon unknownStepIcon;
     private IconAnimator<ReceiveTestStep> iconAnimator;
+
+    private MessageExchangeImpl messageExchange;
 
     public ReceiveTestStep(WsdlTestCase testCase, TestStepConfig config, boolean forLoadTest) {
         super(testCase, config, true, forLoadTest);
@@ -121,6 +117,8 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
         if (!forLoadTest)
             initIcons();
 
+        messageExchange = new MessageExchangeImpl(this);
+
         updateState();
     }
 
@@ -133,7 +131,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                 return null;
 
             if (receivedMessage != null) {
-                applyAssertion(assertion);
+                applyAssertion(assertion, new WsdlSubmitContext(this));
                 updateState();
             }
 
@@ -149,15 +147,14 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
         assertionsSupport.addAssertionsListener(listener);
     }
 
-    private void applyAssertion(WsdlMessageAssertion assertion) {
-        assertion.assertProperty(this, RECEIVED_MESSAGE_PROP_NAME, new MessageExchangeImpl(), new WsdlTestRunContext(
-                this));
+    private void applyAssertion(WsdlMessageAssertion assertion, SubmitContext context) {
+        assertion.assertProperty(this, RECEIVED_MESSAGE_PROP_NAME, messageExchange, context);
     }
 
     private void assertReceivedMessage() {
         if (getReceivedMessage() != null)
             for (WsdlMessageAssertion assertion : assertionsSupport.getAssertionList())
-                applyAssertion(assertion);
+                applyAssertion(assertion, new WsdlSubmitContext(this));
         updateState();
     }
 
@@ -180,8 +177,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     }
 
     @Override
-    protected ExecutableTestStepResult doExecute(PropertyExpansionContext runContext,
-            CancellationToken cancellationToken) {
+    protected ExecutableTestStepResult doExecute(SubmitContext runContext, CancellationToken cancellationToken) {
         ExecutableTestStepResult result = new ExecutableTestStepResult(this);
         result.startTimer();
         result.setStatus(TestStepResult.TestStepStatus.UNKNOWN);
@@ -215,7 +211,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
                         }
 
                         for (WsdlMessageAssertion assertion : assertionsSupport.getAssertionList()) {
-                            applyAssertion(assertion);
+                            applyAssertion(assertion, runContext);
                             failed = assertion.isFailed();
                         }
 
@@ -677,116 +673,15 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
         }
     }
 
-    private class MessageExchangeImpl implements MessageExchange {
+    private class MessageExchangeImpl extends AbstractNonHttpMessageExchange<ReceiveTestStep> {
+
+        public MessageExchangeImpl(ReceiveTestStep modelItem) {
+            super(modelItem);
+        }
 
         @Override
         public String getEndpoint() {
             return null;
-        }
-
-        @Override
-        public String[] getMessages() {
-            return new String[0];
-        }
-
-        @Override
-        public ModelItem getModelItem() {
-            return ReceiveTestStep.this;
-        }
-
-        @Override
-        public Operation getOperation() {
-            return null;
-        }
-
-        @Override
-        public StringToStringMap getProperties() {
-            return null;
-        }
-
-        @Override
-        public String getProperty(String name) {
-            return null;
-        }
-
-        @Override
-        public byte[] getRawRequestData() {
-            return new byte[0];
-        }
-
-        @Override
-        public byte[] getRawResponseData() {
-            return new byte[0];
-        }
-
-        @Override
-        public Attachment[] getRequestAttachments() {
-            return new Attachment[0];
-        }
-
-        @Override
-        public Attachment[] getRequestAttachmentsForPart(String partName) {
-            return new Attachment[0];
-        }
-
-        @Override
-        public String getRequestContent() {
-            return null;
-        }
-
-        @Override
-        public String getRequestContentAsXml() {
-            return null;
-        }
-
-        @Override
-        public StringToStringsMap getRequestHeaders() {
-            return null;
-        }
-
-        @Override
-        public Response getResponse() {
-            return null;
-        }
-
-        @Override
-        public Attachment[] getResponseAttachments() {
-            return new Attachment[0];
-        }
-
-        @Override
-        public Attachment[] getResponseAttachmentsForPart(String partName) {
-            return new Attachment[0];
-        }
-
-        @Override
-        public String getResponseContent() {
-            return null;
-        }
-
-        @Override
-        public String getResponseContentAsXml() {
-            return null;
-        }
-
-        @Override
-        public StringToStringsMap getResponseHeaders() {
-            return null;
-        }
-
-        @Override
-        public long getTimestamp() {
-            return 0;
-        }
-
-        @Override
-        public long getTimeTaken() {
-            return 0;
-        }
-
-        @Override
-        public boolean hasRawData() {
-            return false;
         }
 
         @Override
@@ -800,9 +695,35 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
         }
 
         @Override
+        public Response getResponse() {
+            return null;
+        }
+
+        @Override
+        public String getRequestContent() {
+            return null;
+        }
+
+        @Override
+        public String getResponseContent() {
+            return null;
+        }
+
+        @Override
+        public long getTimeTaken() {
+            return 0;
+        }
+
+        @Override
+        public long getTimestamp() {
+            return System.currentTimeMillis();
+        }
+
+        @Override
         public boolean isDiscarded() {
             return false;
         }
+
     }
 
     enum MessageType {

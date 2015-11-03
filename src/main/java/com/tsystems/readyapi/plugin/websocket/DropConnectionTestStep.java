@@ -8,7 +8,6 @@ import com.eviware.soapui.impl.wsdl.support.IconAnimator;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStepResult;
 import com.eviware.soapui.model.iface.SubmitContext;
-import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 import com.eviware.soapui.model.testsuite.TestStepResult;
 import com.eviware.soapui.monitor.TestMonitor;
 import com.eviware.soapui.plugins.auto.PluginTestStep;
@@ -47,8 +46,7 @@ public class DropConnectionTestStep extends ConnectedTestStep {
     }
 
     @Override
-    protected ExecutableTestStepResult doExecute(PropertyExpansionContext testRunContext,
-            CancellationToken cancellationToken) {
+    protected ExecutableTestStepResult doExecute(SubmitContext testRunContext, CancellationToken cancellationToken) {
         ExecutableTestStepResult result = new ExecutableTestStepResult(this);
         result.startTimer();
         result.setStatus(TestStepResult.TestStepStatus.UNKNOWN);
@@ -82,7 +80,7 @@ public class DropConnectionTestStep extends ConnectedTestStep {
 
                 } else {
                     result.addMessage("Already disconnected from the websocket server");
-                    result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                    result.setStatus(TestStepResult.TestStepStatus.CANCELED);
                 }
             } catch (Exception e) {
                 result.setStatus(TestStepResult.TestStepStatus.FAILED);

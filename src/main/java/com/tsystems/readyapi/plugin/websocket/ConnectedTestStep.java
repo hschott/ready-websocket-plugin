@@ -138,7 +138,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
         ClientCache.assureFinalized(runContext);
     }
 
-    protected abstract ExecutableTestStepResult doExecute(PropertyExpansionContext testRunContext,
+    protected abstract ExecutableTestStepResult doExecute(SubmitContext testRunContext,
             CancellationToken cancellationToken);
 
     protected Client getClient(PropertyExpansionContext runContext, WsdlTestStepResult log) {

@@ -10,7 +10,6 @@ import com.eviware.soapui.impl.wsdl.support.IconAnimator;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStepResult;
 import com.eviware.soapui.model.iface.SubmitContext;
-import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 import com.eviware.soapui.model.support.DefaultTestStepProperty;
 import com.eviware.soapui.model.support.TestStepBeanProperty;
 import com.eviware.soapui.model.testsuite.TestStepResult;
@@ -112,8 +111,7 @@ public class PublishTestStep extends ConnectedTestStep {
     }
 
     @Override
-    protected ExecutableTestStepResult doExecute(PropertyExpansionContext testRunContext,
-            CancellationToken cancellationToken) {
+    protected ExecutableTestStepResult doExecute(SubmitContext testRunContext, CancellationToken cancellationToken) {
 
         ExecutableTestStepResult result = new ExecutableTestStepResult(this);
         result.startTimer();
