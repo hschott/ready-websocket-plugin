@@ -45,7 +45,7 @@ Each Websocket TestStep looks into the cache for a named connection. If an open 
 
 Caching and re-using of open websocket connections only happens when you run a TestCase. When running a single Websocket TestStep it's websocket connection will not be cached for re-use.
 
-When running a LoadTest connections will be re-used over all threads unless `Close Connection: ☑ ︎between each request` is selected. 
+When running a LoadTest connections will be re-used over all threads unless `Close Connection: ☑ ︎between each request` is selected in the 'LoadTest Options' dialog. 
 
 ### Configure Websocket connections 
 
@@ -177,6 +177,7 @@ If no assertion is present then the first received message will be set as valid 
 ### Drop Websocket Connection
 
 This test step disconnects from the websocket server which is useful if you are testing scenarios in which dropped connections are a factor.
+
 Drop Websocket Connection has no effect when running inside a LoadTest.
 
 <img width="536" alt="drop connection" src="https://cloud.githubusercontent.com/assets/4548589/10111185/9c9b83d6-63d2-11e5-8af1-5d2c06b79e0b.png">
