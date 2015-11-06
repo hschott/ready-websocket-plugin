@@ -9,7 +9,6 @@ import com.eviware.soapui.model.testsuite.TestRunListener;
 import com.eviware.soapui.model.testsuite.TestStep;
 import com.eviware.soapui.model.testsuite.TestStepResult;
 import com.eviware.soapui.plugins.ListenerConfiguration;
-import com.eviware.soapui.settings.HttpSettings;
 
 @ListenerConfiguration
 public class CacheCleanUpListener implements LoadTestRunListener, TestRunListener {
@@ -45,9 +44,6 @@ public class CacheCleanUpListener implements LoadTestRunListener, TestRunListene
     @Override
     public void afterTestCase(LoadTestRunner loadTestRunner, LoadTestRunContext context, TestCaseRunner testRunner,
             TestCaseRunContext runContext) {
-        boolean close = testRunner.getTestCase().getSettings().getBoolean(HttpSettings.CLOSE_CONNECTIONS);
-        if (close)
-            ClientCache.assureFinalized(context);
     }
 
     @Override

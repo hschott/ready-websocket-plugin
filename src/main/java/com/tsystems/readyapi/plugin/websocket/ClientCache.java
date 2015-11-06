@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
-import com.eviware.soapui.model.testsuite.TestRunContext;
 
 public class ClientCache {
     private static final String CLIENT_CACHE_PROPNAME = "client_cache";
@@ -19,7 +18,7 @@ public class ClientCache {
     }
 
     public static void assureFinalized(PropertyExpansionContext testRunContext) {
-        lazyCache(testRunContext).assureFinalized();
+        getCache(testRunContext).assureFinalized();
     }
 
     private void assureFinalized() {
@@ -39,20 +38,12 @@ public class ClientCache {
     }
 
     public static ClientCache getCache(PropertyExpansionContext testRunContext) {
-
-        PropertyExpansionContext cacheContext = testRunContext.hasProperty(TestRunContext.LOAD_TEST_CONTEXT) ? (PropertyExpansionContext) testRunContext
-                .getProperty(TestRunContext.LOAD_TEST_CONTEXT) : testRunContext;
-
-        return lazyCache(cacheContext);
-    }
-
-    private static ClientCache lazyCache(PropertyExpansionContext cacheContext) {
         ClientCache cache;
-        synchronized (cacheContext) {
-            cache = (ClientCache) cacheContext.getProperty(CLIENT_CACHE_PROPNAME);
+        synchronized (testRunContext) {
+            cache = (ClientCache) testRunContext.getProperty(CLIENT_CACHE_PROPNAME);
             if (cache == null) {
                 cache = new ClientCache();
-                cacheContext.setProperty(CLIENT_CACHE_PROPNAME, cache);
+                testRunContext.setProperty(CLIENT_CACHE_PROPNAME, cache);
             }
         }
         return cache;

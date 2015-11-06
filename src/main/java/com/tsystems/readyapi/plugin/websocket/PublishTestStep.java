@@ -167,17 +167,6 @@ public class PublishTestStep extends ConnectedTestStep {
         }
     }
 
-    @Override
-    public ExecutableTestStepResult execute(SubmitContext runContext, CancellationToken cancellationToken) {
-        updateState();
-        try {
-            return doExecute(runContext, cancellationToken);
-        } finally {
-            cleanAfterExecution(runContext);
-        }
-
-    }
-
     private String formOutcome(WsdlTestStepResult executionResult) {
         switch (executionResult.getStatus()) {
         case CANCELED:

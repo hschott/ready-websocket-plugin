@@ -21,7 +21,9 @@ import com.eviware.soapui.model.support.DefaultTestStepProperty;
 import com.eviware.soapui.model.support.ModelSupport;
 import com.eviware.soapui.model.testsuite.TestCaseRunContext;
 import com.eviware.soapui.model.testsuite.TestCaseRunner;
+import com.eviware.soapui.model.testsuite.TestRunContext;
 import com.eviware.soapui.model.testsuite.TestStepResult;
+import com.eviware.soapui.settings.HttpSettings;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.xml.XmlObjectConfigurationReader;
 
@@ -141,18 +143,25 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
     protected abstract ExecutableTestStepResult doExecute(SubmitContext testRunContext,
             CancellationToken cancellationToken);
 
-    protected Client getClient(PropertyExpansionContext runContext, WsdlTestStepResult log) {
+    protected Client getClient(PropertyExpansionContext testRunContext, WsdlTestStepResult log) {
         if (connection == null) {
             log.addMessage("Connection for this test step is not selected or is broken.");
             log.setStatus(TestStepResult.TestStepStatus.FAILED);
             return null;
         }
         ExpandedConnectionParams actualConnectionParams;
-        ClientCache cache = ClientCache.getCache(runContext);
+
+        boolean closeConnections = getTestCase().getSettings().getBoolean(HttpSettings.CLOSE_CONNECTIONS);
+        PropertyExpansionContext cacheContext = testRunContext.hasProperty(TestRunContext.LOAD_TEST_CONTEXT)
+                && !closeConnections ? (PropertyExpansionContext) testRunContext
+                .getProperty(TestRunContext.LOAD_TEST_CONTEXT) : testRunContext;
+
+        ClientCache cache = ClientCache.getCache(cacheContext);
+
         Client result = cache.get(connection.getName());
         if (result == null) {
             try {
-                actualConnectionParams = connection.expand(runContext);
+                actualConnectionParams = connection.expand(testRunContext);
             } catch (Exception e) {
                 log.addMessage(e.getMessage());
                 log.setStatus(TestStepResult.TestStepStatus.FAILED);
@@ -592,6 +601,16 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
             builder.add(CONNECTION_NAME_PROP_NAME, connection.getName());
         builder.add(TIMEOUT_PROP_NAME, timeout);
         builder.add(TIMEOUT_MEASURE_PROP_NAME, timeoutMeasure.name());
+    }
+
+    @Override
+    public ExecutableTestStepResult execute(SubmitContext runContext, CancellationToken cancellationToken) {
+        updateState();
+        try {
+            return doExecute(runContext, cancellationToken);
+        } finally {
+            cleanAfterExecution(runContext);
+        }
     }
 
     public enum TimeMeasure {

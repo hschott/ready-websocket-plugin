@@ -269,16 +269,6 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
 
     }
 
-    @Override
-    public ExecutableTestStepResult execute(SubmitContext runContext, CancellationToken cancellationToken) {
-        updateState();
-        try {
-            return doExecute(runContext, cancellationToken);
-        } finally {
-            cleanAfterExecution(runContext);
-        }
-    }
-
     private String formOutcome(ExecutableTestStepResult executionResult) {
         if (executionResult.getStatus() == TestStepResult.TestStepStatus.CANCELED)
             return "CANCELED";

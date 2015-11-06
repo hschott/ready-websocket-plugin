@@ -53,39 +53,40 @@ public class DropConnectionTestStep extends ConnectedTestStep {
         if (iconAnimator != null)
             iconAnimator.start();
         try {
-            try {
-                Client client = getClient(testRunContext, result);
-                if (client == null) {
-                    result.setStatus(TestStepResult.TestStepStatus.FAILED);
-                    return result;
-                }
-
-                if (client.isConnected()) {
-                    switch (dropMethod) {
-                    case SendDisconnect:
-                        client.disconnect(false);
-
-                        break;
-                    case Drop:
-                        client.disconnect(true);
-                        break;
+            if (!isForLoadTest())
+                try {
+                    Client client = getClient(testRunContext, result);
+                    if (client == null) {
+                        result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                        return result;
                     }
 
-                    result.setStatus(TestStepResult.TestStepStatus.OK);
+                    if (client.isConnected()) {
+                        switch (dropMethod) {
+                        case SendDisconnect:
+                            client.disconnect(false);
 
-                } else if (client.isFaulty()) {
+                            break;
+                        case Drop:
+                            client.disconnect(true);
+                            break;
+                        }
+
+                        result.setStatus(TestStepResult.TestStepStatus.OK);
+
+                    } else if (client.isFaulty()) {
+                        result.setStatus(TestStepResult.TestStepStatus.FAILED);
+                        result.setError(client.getThrowable());
+                        return result;
+
+                    } else {
+                        result.addMessage("Already disconnected from the websocket server");
+                        result.setStatus(TestStepResult.TestStepStatus.CANCELED);
+                    }
+                } catch (Exception e) {
                     result.setStatus(TestStepResult.TestStepStatus.FAILED);
-                    result.setError(client.getThrowable());
-                    return result;
-
-                } else {
-                    result.addMessage("Already disconnected from the websocket server");
-                    result.setStatus(TestStepResult.TestStepStatus.CANCELED);
+                    result.setError(e);
                 }
-            } catch (Exception e) {
-                result.setStatus(TestStepResult.TestStepStatus.FAILED);
-                result.setError(e);
-            }
 
             return result;
 
@@ -111,16 +112,6 @@ public class DropConnectionTestStep extends ConnectedTestStep {
         default:
             return String.format("The connection has been dropped within %d ms", executionResult.getTimeTaken());
 
-        }
-    }
-
-    @Override
-    public ExecutableTestStepResult execute(SubmitContext runContext, CancellationToken cancellationToken) {
-        updateState();
-        try {
-            return doExecute(runContext, cancellationToken);
-        } finally {
-            cleanAfterExecution(runContext);
         }
     }
 
