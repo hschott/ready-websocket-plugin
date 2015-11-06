@@ -45,7 +45,7 @@ Each Websocket TestStep looks into the cache for a named connection. If an open 
 
 Caching and re-using of open websocket connections only happens when you run a TestCase. When running a single Websocket TestStep it's websocket connection will not be cached for re-use.
 
-When running a LoadTest connections will be re-used over all threads unless `Close Connection: ☑ ︎between each request` is selected in the 'LoadTest Options' dialog. 
+When running a LoadTest, connections will be re-used over all threads unless `Close Connection: ☑ ︎between each request` is selected in the 'LoadTest Options' dialog. 
 
 ### Configure Websocket connections 
 
