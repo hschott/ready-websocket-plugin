@@ -25,6 +25,10 @@ class Utils {
 
     public static final String TREE_VIEW_IS_UNAVAILABLE = "The Tree View is available in Ready!API only.";
 
+    private Utils() {
+        // utility class
+    }
+
     public static boolean areStringsEqual(String s1, String s2) {
         return areStringsEqual(s1, s2, false);
     }
@@ -40,9 +44,8 @@ class Utils {
 
     public static boolean areStringsEqual(String s1, String s2, boolean caseInsensitive,
             boolean dontDistinctNullAndEmpty) {
-        if (dontDistinctNullAndEmpty)
-            if (s1 == null || s1.length() == 0)
-                return s2 == null || s2.length() == 0;
+        if (dontDistinctNullAndEmpty && (s1 == null || s1.length() == 0))
+            return s2 == null || s2.length() == 0;
         return areStringsEqual(s1, s2, caseInsensitive);
     }
 
@@ -131,7 +134,7 @@ class Utils {
             for (int i = 0; i < result.length; ++i)
                 result[i] = (byte) Short.parseShort(str.substring(i * 2, i * 2 + 2), 16);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(e);
         }
         return result;
     }

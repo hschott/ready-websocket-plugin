@@ -28,7 +28,7 @@ import com.jgoodies.binding.adapter.Bindings;
 import com.jgoodies.binding.list.SelectionInList;
 import com.tsystems.readyapi.plugin.websocket.ConnectedTestStep.TimeMeasure;
 
-public class ConnectedTestStepPanel<T extends ConnectedTestStep> extends ModelItemDesktopPanel<T> {
+public abstract class ConnectedTestStepPanel<T extends ConnectedTestStep> extends ModelItemDesktopPanel<T> {
 
     /** serialVersionUID description. */
     private static final long serialVersionUID = 7510275395689660990L;

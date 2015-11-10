@@ -10,9 +10,6 @@ public class ExpandedConnectionParams {
     public String login;
     public String password;
 
-    public ExpandedConnectionParams() {
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

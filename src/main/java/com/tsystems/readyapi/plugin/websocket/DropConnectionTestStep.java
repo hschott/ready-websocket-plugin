@@ -130,12 +130,7 @@ public class DropConnectionTestStep extends ConnectedTestStep {
     @Override
     protected void readData(XmlObjectConfigurationReader reader) {
         super.readData(reader);
-        try {
-            dropMethod = DropMethod.valueOf(reader.readString(DROP_METHOD_SETTING_NAME,
-                    DropMethod.SendDisconnect.toString()));
-        } catch (IllegalArgumentException | NullPointerException e) {
-            dropMethod = DropMethod.SendDisconnect;
-        }
+        dropMethod = DropMethod.valueOf(reader.readString(DROP_METHOD_SETTING_NAME, DropMethod.SendDisconnect.name()));
     }
 
     public void setDropMethod(DropMethod newValue) {
@@ -166,15 +161,6 @@ public class DropConnectionTestStep extends ConnectedTestStep {
 
         DropMethod(String title) {
             this.title = title;
-        }
-
-        public static DropMethod fromString(String str) {
-            if (str == null)
-                return null;
-            for (DropMethod m : DropMethod.values())
-                if (m.toString().equals(str))
-                    return m;
-            return null;
         }
 
         @Override

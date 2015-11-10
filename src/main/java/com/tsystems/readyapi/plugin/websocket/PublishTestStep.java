@@ -201,12 +201,8 @@ public class PublishTestStep extends ConnectedTestStep {
     @Override
     protected void readData(XmlObjectConfigurationReader reader) {
         super.readData(reader);
-        try {
-            messageKind = PublishedMessageType.valueOf(reader.readString(MESSAGE_KIND_SETTING_NAME,
-                    DEFAULT_MESSAGE_TYPE.name()));
-        } catch (IllegalArgumentException | NullPointerException e) {
-            messageKind = DEFAULT_MESSAGE_TYPE;
-        }
+        messageKind = PublishedMessageType.valueOf(reader.readString(MESSAGE_KIND_SETTING_NAME,
+                DEFAULT_MESSAGE_TYPE.name()));
         message = reader.readString(MESSAGE_SETTING_NAME, "");
     }
 
@@ -236,18 +232,6 @@ public class PublishTestStep extends ConnectedTestStep {
     }
 
     public void setMessage(String value) {
-        try {
-            switch (messageKind) {
-            case IntegerValue:
-                Integer.parseInt(value);
-                break;
-            case LongValue:
-                Long.parseLong(value);
-                break;
-            }
-        } catch (NumberFormatException e) {
-            return;
-        }
         setProperty("message", MESSAGE_PROP_NAME, value);
     }
 
@@ -259,27 +243,6 @@ public class PublishTestStep extends ConnectedTestStep {
         updateData();
         notifyPropertyChanged("messageKind", old, newValue);
         firePropertyValueChanged(MESSAGE_TYPE_PROP_NAME, old.toString(), newValue.toString());
-        String oldMessage = getMessage();
-        if (oldMessage == null)
-            oldMessage = "";
-        try {
-            switch (messageKind) {
-            case IntegerValue:
-                Integer.parseInt(oldMessage);
-                break;
-            case LongValue:
-                Long.parseLong(oldMessage);
-                break;
-            case FloatValue:
-                Float.parseFloat(oldMessage);
-                break;
-            case DoubleValue:
-                Double.parseDouble(oldMessage);
-                break;
-            }
-        } catch (NumberFormatException e) {
-            setMessage("0");
-        }
     }
 
     @Override

@@ -443,12 +443,8 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     @Override
     protected void readData(XmlObjectConfigurationReader reader) {
         super.readData(reader);
-        try {
-            expectedMessageType = MessageType.valueOf(reader.readString(EXPECTED_MESSAGE_TYPE_PROP_NAME,
-                    MessageType.Text.toString()));
-        } catch (IllegalArgumentException | NullPointerException e) {
-            expectedMessageType = MessageType.Text;
-        }
+        expectedMessageType = MessageType.valueOf(reader.readString(EXPECTED_MESSAGE_TYPE_PROP_NAME,
+                MessageType.Text.name()));
     }
 
     @Override
@@ -716,7 +712,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
 
     }
 
-    enum MessageType {
+    protected enum MessageType implements ConnectedTestStepPanel.UIOption {
         Text("Text (UTF-8)"), BinaryData("Raw binary data"), IntegerNumber("Integer number"), FloatNumber(
                 "Float number");
         private String title;
@@ -725,18 +721,8 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
             this.title = title;
         }
 
-        public static MessageType fromString(String s) {
-            if (s == null)
-                return null;
-            for (MessageType m : MessageType.values())
-                if (m.toString().equals(s))
-                    return m;
-            return null;
-
-        }
-
         @Override
-        public String toString() {
+        public String getTitle() {
             return title;
         }
     }

@@ -14,11 +14,9 @@ import com.eviware.soapui.plugins.ListenerConfiguration;
 @ListenerConfiguration
 public class ConnectionsManagerSaveListener implements ProjectListener, WorkspaceListener {
 
-    public ConnectionsManagerSaveListener() {
-    }
-
     @Override
     public void afterLoad(Project project) {
+        //
     }
 
     @Override
@@ -28,67 +26,67 @@ public class ConnectionsManagerSaveListener implements ProjectListener, Workspac
 
     @Override
     public void environmentAdded(Environment environment) {
-
+        //
     }
 
     @Override
     public void environmentRemoved(Environment environment, int i) {
-
+        //
     }
 
     @Override
     public void environmentRenamed(Environment environment, String s, String s1) {
-
+        //
     }
 
     @Override
     public void environmentSwitched(Environment environment) {
-
+        //
     }
 
     @Override
     public void interfaceAdded(Interface anInterface) {
-
+        //
     }
 
     @Override
     public void interfaceRemoved(Interface anInterface) {
-
+        //
     }
 
     @Override
     public void interfaceUpdated(Interface anInterface) {
-
+        //
     }
 
     @Override
     public void loadUITestAdded(LoadTestModelItem loadUiTest) {
-
+        //
     }
 
     @Override
     public void loadUITestRemoved(LoadTestModelItem loadUiTest) {
-
+        //
     }
 
     @Override
     public void mockServiceAdded(MockService mockService) {
-
+        //
     }
 
     @Override
     public void mockServiceRemoved(MockService mockService) {
-
+        //
     }
 
     @Override
     public void projectAdded(Project project) {
-
+        //
     }
 
     @Override
     public void projectChanged(Project project) {
-
+        //
     }
 
     @Override
@@ -98,36 +96,36 @@ public class ConnectionsManagerSaveListener implements ProjectListener, Workspac
 
     @Override
     public void projectOpened(Project project) {
-
+        //
     }
 
     @Override
     public void projectRemoved(Project project) {
-
+        //
     }
 
     @Override
     public void testSuiteAdded(TestSuite testSuite) {
-
+        //
     }
 
     @Override
     public void testSuiteMoved(TestSuite testSuite, int i, int i1) {
-
+        //
     }
 
     @Override
     public void testSuiteRemoved(TestSuite testSuite) {
-
+        //
     }
 
     @Override
     public void workspaceSwitched(Workspace workspace) {
-
+        //
     }
 
     @Override
     public void workspaceSwitching(Workspace workspace) {
-
+        //
     }
 }

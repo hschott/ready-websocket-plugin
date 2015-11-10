@@ -18,11 +18,11 @@ import com.eviware.soapui.support.PropertyChangeNotifier;
 import com.eviware.soapui.support.xml.XmlObjectConfigurationReader;
 
 public class Connection implements PropertyChangeNotifier {
-    private final static Logger LOGGER = Logger.getLogger(PluginConfig.LOGGER_NAME);
+    private static final Logger LOGGER = Logger.getLogger(PluginConfig.LOGGER_NAME);
 
-    final static boolean ARE_NAMES_CASE_INSENSITIVE = true;
+    protected static final boolean ARE_NAMES_CASE_INSENSITIVE = true;
 
-    private final static String NAME_SETTING_NAME = "Name";
+    private static final String NAME_SETTING_NAME = "Name";
     private static final String SERVER_URI_SETTING_NAME = "ServerURI";
     private static final String LOGIN_SETTING_NAME = "Login";
     private static final String ENCR_PASSWORD_SETTING_NAME = "EncrPassword";
@@ -233,4 +233,54 @@ public class Connection implements PropertyChangeNotifier {
             notifyPropertyChanged(SUB_PROTOCOLS_BEAN_PROP, old, newValue);
         }
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((login == null) ? 0 : login.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((originalServerUri == null) ? 0 : originalServerUri.hashCode());
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + ((subprotocols == null) ? 0 : subprotocols.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Connection other = (Connection) obj;
+        if (login == null) {
+            if (other.login != null)
+                return false;
+        } else if (!login.equals(other.login))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (originalServerUri == null) {
+            if (other.originalServerUri != null)
+                return false;
+        } else if (!originalServerUri.equals(other.originalServerUri))
+            return false;
+        if (password == null) {
+            if (other.password != null)
+                return false;
+        } else if (!password.equals(other.password))
+            return false;
+        if (subprotocols == null) {
+            if (other.subprotocols != null)
+                return false;
+        } else if (!subprotocols.equals(other.subprotocols))
+            return false;
+        return true;
+    }
+
 }

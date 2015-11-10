@@ -11,7 +11,7 @@ import com.eviware.soapui.model.testsuite.TestStepResult;
 import com.eviware.soapui.plugins.ListenerConfiguration;
 
 @ListenerConfiguration
-public class CacheCleanUpListener implements LoadTestRunListener, TestRunListener {
+public class ClientCacheCleanUpListener implements LoadTestRunListener, TestRunListener {
 
     @Override
     public void afterRun(TestCaseRunner testRunner, TestCaseRunContext runContext) {
@@ -20,34 +20,41 @@ public class CacheCleanUpListener implements LoadTestRunListener, TestRunListene
 
     @Override
     public void beforeLoadTest(LoadTestRunner loadTestRunner, LoadTestRunContext context) {
+        //
     }
 
     @Override
     public void loadTestStarted(LoadTestRunner loadTestRunner, LoadTestRunContext context) {
+        //
     }
 
     @Override
     public void beforeTestCase(LoadTestRunner loadTestRunner, LoadTestRunContext context, TestCaseRunner testRunner,
             TestCaseRunContext runContext) {
+        //
     }
 
     @Override
     public void beforeTestStep(LoadTestRunner loadTestRunner, LoadTestRunContext context, TestCaseRunner testRunner,
             TestCaseRunContext runContext, TestStep testStep) {
+        //
     }
 
     @Override
     public void afterTestStep(LoadTestRunner loadTestRunner, LoadTestRunContext context, TestCaseRunner testRunner,
             TestCaseRunContext runContext, TestStepResult testStepResult) {
+        //
     }
 
     @Override
     public void afterTestCase(LoadTestRunner loadTestRunner, LoadTestRunContext context, TestCaseRunner testRunner,
             TestCaseRunContext runContext) {
+        //
     }
 
     @Override
     public void loadTestStopped(LoadTestRunner loadTestRunner, LoadTestRunContext context) {
+        //
     }
 
     @Override
@@ -57,17 +64,21 @@ public class CacheCleanUpListener implements LoadTestRunListener, TestRunListene
 
     @Override
     public void beforeRun(TestCaseRunner testRunner, TestCaseRunContext runContext) {
+        //
     }
 
     @Override
     public void beforeStep(TestCaseRunner testRunner, TestCaseRunContext runContext) {
+        //
     }
 
     @Override
     public void beforeStep(TestCaseRunner testRunner, TestCaseRunContext runContext, TestStep testStep) {
+        //
     }
 
     @Override
     public void afterStep(TestCaseRunner testRunner, TestCaseRunContext runContext, TestStepResult result) {
+        //
     }
 }

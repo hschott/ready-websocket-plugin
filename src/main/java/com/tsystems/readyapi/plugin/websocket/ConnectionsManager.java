@@ -23,7 +23,7 @@ class ConnectionsManager implements PropertyChangeListener {
     private final static String CONNECTIONS_SETTING_NAME = "WebSocketConnections";
     private final static String CONNECTION_SECTION_NAME = "Connection";
 
-    private static ConnectionsManager instance = null;
+    private static ConnectionsManager instance = new ConnectionsManager();
     private HashMap<Project, ArrayList<Connection>> connections = new HashMap<>();
     private HashMap<Project, ArrayList<ConnectionsListener>> listeners = new HashMap<>();
 
@@ -37,7 +37,7 @@ class ConnectionsManager implements PropertyChangeListener {
         ArrayList<Connection> projectConnections = getInstance().getProjectConnectionsList(project, true);
         boolean alreadyAdded = false;
         for (Connection curConnection : projectConnections)
-            if (curConnection == connection) {
+            if (curConnection.equals(connection)) {
                 alreadyAdded = true;
                 break;
             }
@@ -61,7 +61,7 @@ class ConnectionsManager implements PropertyChangeListener {
         projectListeners.add(listener);
     }
 
-    static void beforeProjectSaved(Project project) {
+    public static void beforeProjectSaved(Project project) {
         saveConnections(project, getInstance().connections.get(project));
     }
 
@@ -72,7 +72,7 @@ class ConnectionsManager implements PropertyChangeListener {
             for (ConnectionsListener listener : listenersForProject)
                 try {
                     listener.connectionChanged(connection, propertyName, oldValue, newValue);
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     LOGGER.error(e);
                 }
     }
@@ -108,8 +108,6 @@ class ConnectionsManager implements PropertyChangeListener {
     }
 
     private static ConnectionsManager getInstance() {
-        if (instance == null)
-            instance = new ConnectionsManager();
         return instance;
     }
 
@@ -135,9 +133,7 @@ class ConnectionsManager implements PropertyChangeListener {
         return result;
     }
 
-    static void onProjectClosed(Project project) {
-        if (instance == null)
-            return;
+    public static void onProjectClosed(Project project) {
         ArrayList<Connection> closedConnections = getInstance().connections.remove(project);
         if (closedConnections != null)
             for (Connection connection : closedConnections)
@@ -171,7 +167,7 @@ class ConnectionsManager implements PropertyChangeListener {
     }
 
     private static void saveConnections(Project project, List<Connection> connections) {
-        if (connections == null || connections.size() == 0)
+        if (connections == null || connections.isEmpty())
             project.getSettings().clearSetting(CONNECTIONS_SETTING_NAME);
         else {
             XmlObjectBuilder builder = new XmlObjectBuilder();
@@ -195,7 +191,7 @@ class ConnectionsManager implements PropertyChangeListener {
                     if (projectConnections != null)
                         for (Connection connection : projectConnections)
                             connection.addPropertyChangeListener(this);
-                    if (projectConnections == null && ensureListCreated)
+                    else if (ensureListCreated)
                         projectConnections = new ArrayList<>();
                     getInstance().connections.put(project, projectConnections);
                 } else if (ensureListCreated)

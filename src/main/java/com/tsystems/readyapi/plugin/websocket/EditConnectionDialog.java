@@ -235,11 +235,6 @@ public class EditConnectionDialog extends SimpleDialog {
         return label;
     }
 
-    @Override
-    public void dispose() {
-        super.dispose();
-    }
-
     private GridBagConstraints extraComponentPlace(int row) {
         return new GridBagConstraints(2, row, 1, 1, 0, 0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE,
                 defaultInsets, 0, 0);

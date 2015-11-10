@@ -31,15 +31,15 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
         PropertyChangeListener {
     private final static Logger LOGGER = Logger.getLogger(PluginConfig.LOGGER_NAME);
 
-    final static String SERVER_URI_PROP_NAME = "ServerURI";
-    final static String SUB_PROTOCOLS_PROP_NAME = "SubProtocols";
-    final static String LOGIN_PROP_NAME = "Login";
-    final static String PASSWORD_PROP_NAME = "Password";
-    final static String CONNECTION_NAME_PROP_NAME = "ConnectionName";
+    private final static String SERVER_URI_PROP_NAME = "ServerURI";
+    private final static String SUB_PROTOCOLS_PROP_NAME = "SubProtocols";
+    private final static String LOGIN_PROP_NAME = "Login";
+    private final static String PASSWORD_PROP_NAME = "Password";
+    private final static String CONNECTION_NAME_PROP_NAME = "ConnectionName";
 
-    final static String TIMEOUT_PROP_NAME = "Timeout";
-    final static String TIMEOUT_MEASURE_PROP_NAME = "TimeoutMeasure";
-    final static String TIMEOUT_EXPIRED_MSG = "The test step's timeout has expired.";
+    protected final static String TIMEOUT_PROP_NAME = "Timeout";
+    private final static String TIMEOUT_MEASURE_PROP_NAME = "TimeoutMeasure";
+    protected final static String TIMEOUT_EXPIRED_MSG = "The test step's timeout has expired.";
 
     private Connection connection;
 
@@ -276,12 +276,8 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
             connection.addPropertyChangeListener(this);
 
         timeout = reader.readInt(TIMEOUT_PROP_NAME, 30000);
-        try {
-            timeoutMeasure = TimeMeasure.valueOf(reader.readString(TIMEOUT_MEASURE_PROP_NAME,
-                    TimeMeasure.Milliseconds.toString()));
-        } catch (NumberFormatException | NullPointerException e) {
-            timeoutMeasure = TimeMeasure.Milliseconds;
-        }
+        timeoutMeasure = TimeMeasure.valueOf(reader.readString(TIMEOUT_MEASURE_PROP_NAME,
+                TimeMeasure.Milliseconds.name()));
     }
 
     @Override
@@ -318,7 +314,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                     curClass = curClass.getSuperclass();
                 }
             if (field == null)
-                throw new RuntimeException(String.format(
+                throw new IllegalArgumentException(String.format(
                         "Error during access to %s bean property (details: unable to find the underlying field)",
                         propName)); // We may not get here
             field.setAccessible(true);
@@ -328,8 +324,8 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                 return;
             field.set(this, value);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException(String.format("Error during access to %s bean property (details: %s)", propName,
-                    e.getMessage() + ")")); // We may not get here
+            throw new IllegalArgumentException(String.format("Error during access to %s bean property (details: %s)",
+                    propName, e.getMessage() + ")")); // We may not get here
         }
         updateData();
         notifyPropertyChanged(propName, old, value);
@@ -387,7 +383,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                     curClass = curClass.getSuperclass();
                 }
             if (field == null)
-                throw new RuntimeException(String.format(
+                throw new IllegalArgumentException(String.format(
                         "Error during access to %s bean property (details: unable to find the underlying field)",
                         propName)); // We may not get here
             field.setAccessible(true);
@@ -397,8 +393,8 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                 return false;
             field.set(this, value);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException(String.format("Error during access to %s bean property (details: %s)", propName,
-                    e.getMessage() + ")")); // We may not get here
+            throw new IllegalArgumentException(String.format("Error during access to %s bean property (details: %s)",
+                    propName, e.getMessage() + ")")); // We may not get here
         }
         updateData();
         notifyPropertyChanged(propName, old, value);
@@ -437,9 +433,9 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                         curClass = curClass.getSuperclass();
                     }
                 if (field == null)
-                    throw new RuntimeException(String.format(
+                    throw new IllegalArgumentException(String.format(
                             "Error during access to %s bean property (details: unable to find the underlying field)",
-                            propName)); // We may not get here
+                            propName));
                 field.setAccessible(true);
                 old = field.get(this);
 
@@ -450,8 +446,8 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
                     return false;
                 field.set(this, value);
             } catch (IllegalAccessException e) {
-                throw new RuntimeException(String.format("Error during access to %s bean property (details: %s)",
-                        propName, e.getMessage() + ")")); // We may not get here
+                throw new IllegalArgumentException(String.format(
+                        "Error during access to %s bean property (details: %s)", propName, e.getMessage() + ")"), e);
             }
             updateData();
         }
@@ -613,7 +609,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
         }
     }
 
-    public enum TimeMeasure {
+    public enum TimeMeasure implements ConnectedTestStepPanel.UIOption {
         Milliseconds("milliseconds"), Seconds("seconds");
         private String title;
 
@@ -622,7 +618,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
         }
 
         @Override
-        public String toString() {
+        public String getTitle() {
             return title;
         }
     }

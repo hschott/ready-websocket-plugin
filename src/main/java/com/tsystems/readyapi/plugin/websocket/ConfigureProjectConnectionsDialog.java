@@ -177,7 +177,7 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
         if (tableModel.getRemovedConnections() != null)
             for (Connection connection : tableModel.getRemovedConnections()) {
                 List<TestStep> usingTestSteps = tableModel.getUsageData().get(connection);
-                if (usingTestSteps != null && usingTestSteps.size() != 0)
+                if (usingTestSteps != null && !usingTestSteps.isEmpty())
                     for (TestStep testStep : usingTestSteps)
                         ((ConnectedTestStep) testStep).setConnection(null);
                 ConnectionsManager.removeConnection(connectionsTargetItem, connection);
@@ -291,9 +291,10 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
                 if (connection == null)
                     return false;
                 List<TestStep> involvingTestSteps = usageData.get(connection);
-                return involvingTestSteps != null && involvingTestSteps.size() > 0;
+                return involvingTestSteps != null && !involvingTestSteps.isEmpty();
+            default:
+                return null;
             }
-            return null;
         }
 
         @Override
@@ -432,38 +433,38 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
             if (rows == null || rows.length == 0)
                 return;
             int connectionNo = 0;
-            String msg;
+            StringBuffer msg = new StringBuffer();
             if (rows.length == 1) {
-                msg = tableModel.getItem(rows[0]).name;
-                if (StringUtils.isNullOrEmpty(msg))
-                    msg = "Do you really want to delete this connection?";
+                String connectionName = tableModel.getItem(rows[0]).name;
+                if (StringUtils.isNullOrEmpty(connectionName))
+                    msg.append("Do you really want to delete this connection?");
                 else
-                    msg = "Do you really want to delete \"" + msg + "\" connection?";
+                    msg.append("Do you really want to delete \"" + connectionName + "\" connection?");
             } else {
-                msg = "Do you really want to delete these connections?";
+                msg.append("Do you really want to delete these connections?");
                 for (int row : rows) {
                     ConnectionRecord record = tableModel.getItem(row);
                     if (connectionNo != maxCount) {
-                        msg += "\n";
+                        msg.append("\n");
                         if (StringUtils.hasContent(record.name))
-                            msg += record.name;
+                            msg.append(record.name);
                         else
-                            msg += "<untitled>";
+                            msg.append("<untitled>");
                         connectionNo++;
                     } else
-                        msg += "\n...";
+                        msg.append("\n...");
                 }
             }
             List<String> affectedModelItems = getAffectedModelItems(rows, maxCount);
-            if (affectedModelItems != null && affectedModelItems.size() != 0) {
-                msg += "\nNote, that the following test step(s) will be deprived of a connection and have to be customized later:";
+            if (affectedModelItems != null && !affectedModelItems.isEmpty()) {
+                msg.append("\nNote, that the following test step(s) will be deprived of a connection and have to be customized later:");
                 for (int i = 0; i < affectedModelItems.size(); ++i) {
-                    msg += "\n";
-                    msg += affectedModelItems.get(i);
+                    msg.append("\n");
+                    msg.append(affectedModelItems.get(i));
                 }
 
             }
-            if (UISupport.getDialogs().confirm(msg, "Confirm deletion")) {
+            if (UISupport.getDialogs().confirm(msg.toString(), "Confirm deletion")) {
                 Arrays.sort(rows);
                 for (int i = rows.length - 1; i >= 0; --i)
                     tableModel.removeItem(rows[i]);

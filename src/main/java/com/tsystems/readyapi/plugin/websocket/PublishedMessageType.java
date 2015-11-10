@@ -39,7 +39,7 @@ enum PublishedMessageType {
                 iv = Integer.parseInt(payload);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException(String.format(
-                        "The specified text (\"%s\") cannot represent an integer value.", payload));
+                        "The specified text (\"%s\") cannot represent an integer value.", payload), e);
             }
             buf = new byte[4];
             for (int i = 0; i < 4; ++i)
@@ -52,7 +52,7 @@ enum PublishedMessageType {
                 lv = Long.parseLong(payload);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException(String.format(
-                        "The specified text (\"%s\") cannot represent a long value.", payload));
+                        "The specified text (\"%s\") cannot represent a long value.", payload), e);
             }
             buf = new byte[8];
             for (int i = 0; i < 8; ++i)
@@ -66,7 +66,7 @@ enum PublishedMessageType {
                 dv = Double.parseDouble(payload);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException(String.format(
-                        "The specified text (\"%s\") cannot represent a double value.", payload));
+                        "The specified text (\"%s\") cannot represent a double value.", payload), e);
             }
             long rawD = Double.doubleToLongBits(dv);
             for (int i = 0; i < 8; ++i)
@@ -80,7 +80,7 @@ enum PublishedMessageType {
                 fv = Float.parseFloat(payload);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException(String.format(
-                        "The specified text (\"%s\") cannot represent a float value.", payload));
+                        "The specified text (\"%s\") cannot represent a float value.", payload), e);
             }
             int rawF = Float.floatToIntBits(fv);
             for (int i = 0; i < 4; ++i)
@@ -98,15 +98,12 @@ enum PublishedMessageType {
                 return new Message.BinaryMessage(FileUtils.readFileToByteArray(file));
 
             } catch (IOException e) {
-                throw new RuntimeException(String.format(
+                throw new IllegalArgumentException(String.format(
                         "Attempt of access to \"%s\" file with a published message has failed.", file.getPath()), e);
             }
 
         }
-        throw new IllegalArgumentException("The format of the published message is not specified or unknown."); // We
-        // won't
-        // be
-        // here
+        throw new IllegalArgumentException("The format of the published message is not specified or unknown.");
     }
 
     @Override
