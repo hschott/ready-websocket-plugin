@@ -445,7 +445,7 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
                 for (int row : rows) {
                     ConnectionRecord record = tableModel.getItem(row);
                     if (connectionNo != maxCount) {
-                        msg.append("\n");
+                        msg.append('\n');
                         if (StringUtils.hasContent(record.name))
                             msg.append(record.name);
                         else
@@ -459,7 +459,7 @@ public class ConfigureProjectConnectionsDialog extends SimpleDialog {
             if (affectedModelItems != null && !affectedModelItems.isEmpty()) {
                 msg.append("\nNote, that the following test step(s) will be deprived of a connection and have to be customized later:");
                 for (int i = 0; i < affectedModelItems.size(); ++i) {
-                    msg.append("\n");
+                    msg.append('\n');
                     msg.append(affectedModelItems.get(i));
                 }
 

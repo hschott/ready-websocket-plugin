@@ -265,9 +265,8 @@ public class TyrusClient extends Endpoint implements Client {
         Future<?> future;
         if (closeReason.getCloseCode().getCode() > CloseCodes.NORMAL_CLOSURE.getCode())
             throwable.set(websocketException("Websocket connection closed abnormaly.", closeReason));
-        else if ((future = this.future.get()) != null)
-            if (!future.isDone())
-                throwable.set(websocketException("Websocket connection closed unexpected.", closeReason));
+        else if ((future = this.future.get()) != null && !future.isDone())
+            throwable.set(websocketException("Websocket connection closed unexpected.", closeReason));
     }
 
     public WebSocketException websocketException(final String message, final CloseReason closeReason) {

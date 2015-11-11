@@ -129,7 +129,7 @@ public abstract class ConnectedTestStepPanel<T extends ConnectedTestStep> extend
         }
     }
 
-    static class ConnectionComboItem {
+    private static class ConnectionComboItem {
         private Connection obj;
 
         public ConnectionComboItem(Connection connection) {
@@ -137,11 +137,28 @@ public abstract class ConnectedTestStepPanel<T extends ConnectedTestStep> extend
         }
 
         @Override
-        public boolean equals(Object op) {
-            if (op instanceof ConnectionComboItem)
-                return ((ConnectionComboItem) op).obj == obj;
-            else
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((obj == null) ? 0 : obj.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
                 return false;
+            if (getClass() != obj.getClass())
+                return false;
+            ConnectionComboItem other = (ConnectionComboItem) obj;
+            if (this.obj == null) {
+                if (other.obj != null)
+                    return false;
+            } else if (!this.obj.equals(other.obj))
+                return false;
+            return true;
         }
 
         public Connection getObject() {

@@ -325,7 +325,7 @@ public abstract class ConnectedTestStep extends WsdlTestStepWithProperties imple
             field.set(this, value);
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException(String.format("Error during access to %s bean property (details: %s)",
-                    propName, e.getMessage() + ")")); // We may not get here
+                    propName, e.getMessage() + ")"), e); // We may not get here
         }
         updateData();
         notifyPropertyChanged(propName, old, value);

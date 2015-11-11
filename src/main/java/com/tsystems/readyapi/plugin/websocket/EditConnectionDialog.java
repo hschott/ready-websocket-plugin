@@ -306,8 +306,8 @@ public class EditConnectionDialog extends SimpleDialog {
     }
 
     public static class IsCheckedValueModel extends AbstractValueModel {
-        /** serialVersionUID description. */
         private static final long serialVersionUID = -7698588095167209408L;
+
         private JCheckBox component;
 
         public IsCheckedValueModel(final JCheckBox component) {
@@ -327,13 +327,14 @@ public class EditConnectionDialog extends SimpleDialog {
 
         @Override
         public void setValue(Object newValue) {
+            //
         }
 
     }
 
     public static class IsVisibleValueModel extends AbstractValueModel {
-        /** serialVersionUID description. */
         private static final long serialVersionUID = -3278995837998406344L;
+
         private JComponent component;
 
         public IsVisibleValueModel(JComponent component) {
@@ -358,6 +359,7 @@ public class EditConnectionDialog extends SimpleDialog {
 
         @Override
         public void setValue(Object newValue) {
+            //
         }
     }
 
