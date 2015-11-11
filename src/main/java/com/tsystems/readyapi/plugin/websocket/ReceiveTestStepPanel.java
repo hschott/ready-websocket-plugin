@@ -136,7 +136,7 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
 
             @Override
             public void focusLost(FocusEvent e) {
-
+                //
             }
         });
         recMessageMemo.setRows(8);
