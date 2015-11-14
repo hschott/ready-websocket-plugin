@@ -18,6 +18,9 @@ This plugin is compatible and works with:
 * SoapUI 5.2.x
 * Ready! API 1.4.x
 
+This plugin is not signed by Smartbear. If you like to run it in SoapUI OS >= 5.2.1 you have to install [SoapUI PluginLoader Jailbreak](https://github.com/hschott/soapui-pluginloader-jailbreak).
+
+
 ### Install in SoapUI
 
 Download the latest release JAR file and copy it to `<user home>/.soapuios/plugins/` .
