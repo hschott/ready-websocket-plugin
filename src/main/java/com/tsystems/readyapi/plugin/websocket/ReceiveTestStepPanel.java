@@ -8,11 +8,13 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.util.Date;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.ListModel;
@@ -94,6 +96,16 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
         assertionListChanged();
     }
 
+    protected void buildMaxMessagesSpinEdit(SimpleBindingForm form, PresentationModel<ReceiveTestStep> pm, String label) {
+        JPanel timeoutPanel = new JPanel();
+        timeoutPanel.setLayout(new BoxLayout(timeoutPanel, BoxLayout.X_AXIS));
+        JSpinner spinEdit = Utils.createBoundSpinEdit(pm, "maxMessageCount", 0, Integer.MAX_VALUE, 1);
+        spinEdit.setPreferredSize(new Dimension(80, spinEdit.getHeight()));
+        timeoutPanel.add(spinEdit);
+        timeoutPanel.add(new JLabel(" message (0 - forever)"));
+        form.append(label, timeoutPanel);
+    }
+
     private AssertionsPanel buildAssertionsPanel() {
         return new AssertionsPanel(getModelItem());
     }
@@ -121,9 +133,10 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
         form.appendComboBox("expectedMessageType", "Expected message type", ReceiveTestStep.MessageType.values(),
                 "Expected type of a received message");
         buildTimeoutSpinEdit(form, pm, "Timeout");
+        buildMaxMessagesSpinEdit(form, pm, "Stop after");
         form.appendSeparator();
         form.appendHeading("Received message");
-
+        form.appendTextField("messageCount", "Count", "Number of messages received").setEditable(false);
         recMessageMemo = form.appendTextArea("receivedMessage", "Message", "The payload of the received message");
         recMessageMemo.setEditable(false);
         recMessageMemo.getCaret().setVisible(true);
@@ -131,7 +144,6 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
             @Override
             public void focusGained(FocusEvent e) {
                 recMessageMemo.getCaret().setVisible(true);
-
             }
 
             @Override

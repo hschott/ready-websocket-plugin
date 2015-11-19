@@ -12,6 +12,7 @@ import java.nio.charset.CodingErrorAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
@@ -60,6 +61,8 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     private final static String EXPECTED_MESSAGE_TYPE_PROP_NAME = "ExpectedMessageType";
 
     private final static String RECEIVED_MESSAGE_PROP_NAME = "ReceivedMessage";
+    private final static String MAX_MESSAGE_COUNT_PROP_NAME = "MaxMessageCount";
+    private final static String MESSAGE_COUNT_PROP_NAME = "MessageCount";
     private final static String ASSERTION_SECTION = "assertion";
 
     private static boolean actionGroupAdded = false;
@@ -67,6 +70,9 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     private MessageType expectedMessageType = MessageType.Text;
 
     private String receivedMessage = null;
+    private int maxMessageCount = 0;
+    private String messageCount = null;
+    private AtomicLong messageCounter = new AtomicLong();
 
     private AssertionsSupport assertionsSupport;
     private AssertionStatus assertionStatus = AssertionStatus.UNKNOWN;
@@ -101,16 +107,38 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
 
                     @Override
                     public void setValue(DefaultTestStepProperty property, String value) {
-                        int newTimeout;
+                        int newValue;
                         try {
-                            newTimeout = Integer.parseInt(value);
+                            newValue = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
                             return;
                         }
-                        setTimeout(newTimeout);
+                        setTimeout(newValue);
                     }
 
                 }, this));
+
+        addProperty(new DefaultTestStepProperty(MAX_MESSAGE_COUNT_PROP_NAME, false,
+                new DefaultTestStepProperty.PropertyHandler() {
+                    @Override
+                    public String getValue(DefaultTestStepProperty property) {
+                        return Integer.toString(getMaxMessageCount());
+                    }
+
+                    @Override
+                    public void setValue(DefaultTestStepProperty property, String value) {
+                        int newValue;
+                        try {
+                            newValue = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            return;
+                        }
+                        setMaxMessageCount(newValue);
+                    }
+
+                }, this));
+
+        addProperty(new TestStepBeanProperty(MESSAGE_COUNT_PROP_NAME, true, this, "messageCount", this));
 
         addProperty(new TestStepBeanProperty(RECEIVED_MESSAGE_PROP_NAME, true, this, "receivedMessage", this));
 
@@ -199,8 +227,10 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
 
                 Message<?> msg = null;
                 boolean failed = false;
-                while (System.nanoTime() <= maxTime && !cancellationToken.isCancelled())
+                while (System.nanoTime() <= maxTime && !cancellationToken.isCancelled()
+                        && (maxMessageCount == 0 || messageCounter.get() < maxMessageCount))
                     if ((msg = client.nextMessage(10)) != null) {
+                        setMessageCount(String.valueOf(messageCounter.incrementAndGet()));
 
                         if (!storeMessage(msg, result)) {
                             result.addMessage(String
@@ -290,7 +320,6 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
 
     @Override
     public String getAssertableContentAsXml() {
-        // XmlObject.Factory.parse(receivedMessage)
         return getReceivedMessage();
     }
 
@@ -345,6 +374,14 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
 
     public String getReceivedMessage() {
         return receivedMessage;
+    }
+
+    public int getMaxMessageCount() {
+        return maxMessageCount;
+    }
+
+    public String getMessageCount() {
+        return messageCount;
     }
 
     @Override
@@ -427,8 +464,18 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     public void prepare(TestCaseRunner testRunner, TestCaseRunContext testRunContext) throws Exception {
         super.prepare(testRunner, testRunContext);
         setReceivedMessage(null);
+        messageCounter.set(0);
+        setMessageCount(String.valueOf(messageCounter));
         for (TestAssertion assertion : assertionsSupport.getAssertionList())
             assertion.prepare(testRunner, testRunContext);
+    }
+
+    @Override
+    public ExecutableTestStepResult execute(SubmitContext runContext, CancellationToken cancellationToken) {
+        setReceivedMessage(null);
+        messageCounter.set(0);
+        setMessageCount(String.valueOf(messageCounter));
+        return super.execute(runContext, cancellationToken);
     }
 
     @Override
@@ -445,6 +492,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
         super.readData(reader);
         expectedMessageType = MessageType.valueOf(reader.readString(EXPECTED_MESSAGE_TYPE_PROP_NAME,
                 MessageType.Text.name()));
+        maxMessageCount = reader.readInt(MAX_MESSAGE_COUNT_PROP_NAME, 0);
     }
 
     @Override
@@ -476,6 +524,14 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
 
     public void setReceivedMessage(String value) {
         setProperty("receivedMessage", RECEIVED_MESSAGE_PROP_NAME, value);
+    }
+
+    public void setMaxMessageCount(int maxMessageCount) {
+        setIntProperty("maxMessageCount", MAX_MESSAGE_COUNT_PROP_NAME, maxMessageCount);
+    }
+
+    public void setMessageCount(String value) {
+        setProperty("messageCount", MESSAGE_COUNT_PROP_NAME, value);
     }
 
     private boolean storeMessage(Message<?> message, WsdlTestStepResult errors) {
@@ -625,6 +681,7 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     protected void writeData(XmlObjectBuilder builder) {
         super.writeData(builder);
         builder.add(EXPECTED_MESSAGE_TYPE_PROP_NAME, expectedMessageType.name());
+        builder.add(MAX_MESSAGE_COUNT_PROP_NAME, maxMessageCount);
         for (TestAssertionConfig assertionConfig : assertionConfigs)
             builder.addSection(ASSERTION_SECTION, assertionConfig);
     }
