@@ -18,7 +18,7 @@ This plugin is compatible and works with:
 * SoapUI 5.2.x
 * Ready! API 1.4.x
 
-This plugin is not signed by Smartbear. If you like to run it in SoapUI OS >= 5.2.1 you have to install [SoapUI PluginLoader Jailbreak](https://github.com/hschott/soapui-pluginloader-jailbreak).
+If you like to run an unsigned version in SoapUI OS >= 5.2.1 you have to install [SoapUI PluginLoader Jailbreak](https://github.com/hschott/soapui-pluginloader-jailbreak).
 
 
 ### Install in SoapUI
@@ -143,7 +143,7 @@ The test step will fail if a connection to websocket server is not established a
 
 This test step waits until a message is received from the websocket server and optionaly asserts the message.
 
-<img width="629" alt="receive message" src="https://cloud.githubusercontent.com/assets/4548589/10111464/842ad066-63d4-11e5-99c9-df877ee9ca73.png">
+<img width="629" alt="receive message" src="https://cloud.githubusercontent.com/assets/4548589/11307819/cef16436-8fba-11e5-9ea2-b8fa2930c63a.png">
 
 **Connection**
 
@@ -165,6 +165,10 @@ This field specifies how to interpret a received message payload. If a message c
 **Timeout**
 
 The test step will fail if a valid message isn't received within a specified period.
+
+**Stop after**
+
+The test step will fail if a valid message isn't received after the specified number of messages.
 
 **Received message**
 
