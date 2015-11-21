@@ -51,6 +51,7 @@ public class TyrusClient extends Endpoint implements Client {
     private URI uri;
     private ProxySelector proxySelector;
     private boolean proxySelectorWorkaround;
+    private volatile boolean disposed = false;
 
     public TyrusClient(ExpandedConnectionParams connectionParams) throws URISyntaxException {
 
@@ -171,6 +172,8 @@ public class TyrusClient extends Endpoint implements Client {
      */
     @Override
     public void dispose() {
+        disposed = true;
+
         resetProxySelector();
 
         Session session;
@@ -300,6 +303,15 @@ public class TyrusClient extends Endpoint implements Client {
     public void onOpen(Session session, EndpointConfig config) {
         SoapUI.log("WebSocketConnect success=" + session.isOpen() + " accepted protocol="
                 + session.getNegotiatedSubprotocol());
+        resetProxySelector();
+
+        this.session.set(session);
+
+        if (disposed) {
+            SoapUI.log("WebSocketClient already disposed closing session");
+            dispose();
+            return;
+        }
 
         ((TyrusSession) session).setHeartbeatInterval(30000);
 
@@ -308,8 +320,8 @@ public class TyrusClient extends Endpoint implements Client {
             @Override
             public void onMessage(String payload) {
                 Message.TextMessage message = new Message.TextMessage(payload);
-                messageQueue.offer(message);
-
+                if (!messageQueue.offer(message))
+                    SoapUI.log("Internal queue overloaded, closing session.");
             }
         });
         session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
@@ -317,13 +329,10 @@ public class TyrusClient extends Endpoint implements Client {
             @Override
             public void onMessage(ByteBuffer payload) {
                 Message.BinaryMessage message = new Message.BinaryMessage(payload);
-                messageQueue.offer(message);
+                if (!messageQueue.offer(message))
+                    SoapUI.log("Internal queue overloaded, closing session.");
             }
         });
-        this.session.set(session);
-
-        resetProxySelector();
-
     }
 
     @Override
