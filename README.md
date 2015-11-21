@@ -172,7 +172,7 @@ The test step will fail if a valid message isn't received after the specified nu
 
 **Received message**
 
-The payload of a valid message which was received as a result of the test step execution.
+The payload of a message which was received as a result of the test step execution.
 
 **Assertions**
 
