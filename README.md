@@ -143,7 +143,7 @@ The test step will fail if a connection to websocket server is not established a
 
 This test step waits until a message is received from the websocket server and optionaly asserts the message.
 
-<img width="629" alt="receive message" src="https://cloud.githubusercontent.com/assets/4548589/11307819/cef16436-8fba-11e5-9ea2-b8fa2930c63a.png">
+<img width="629" alt="receive message" src="https://cloud.githubusercontent.com/assets/4548589/11326134/30e4175e-9161-11e5-9192-7b2420222714.png">
 
 **Connection**
 
