@@ -170,6 +170,10 @@ The test step will fail if a valid message isn't received within a specified per
 
 The test step will fail if a valid message isn't received after the specified number of messages.
 
+**Count**
+
+The count of all processed messages. The websocket client may consume some more messages before it is stopped.
+
 **Received message**
 
 The payload of a message which was received as a result of the test step execution.
