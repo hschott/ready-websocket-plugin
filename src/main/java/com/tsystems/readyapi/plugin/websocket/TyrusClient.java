@@ -51,7 +51,8 @@ public class TyrusClient extends Endpoint implements Client {
     private URI uri;
     private ProxySelector proxySelector;
     private boolean proxySelectorWorkaround;
-    private volatile boolean disposed = false;
+    private volatile boolean disposing = false;
+    private volatile boolean connecting = false;
 
     public TyrusClient(ExpandedConnectionParams connectionParams) throws URISyntaxException {
 
@@ -118,9 +119,15 @@ public class TyrusClient extends Endpoint implements Client {
      */
     @Override
     public void connect(long timeoutMillis) {
-        if (isConnected())
-            return;
+        synchronized (this) {
+            if (isConnected() || connecting)
+                return;
+            connecting = true;
+            disposing = false;
+        }
+
         try {
+
             checkProxySelector();
 
             throwable.set(null);
@@ -172,7 +179,7 @@ public class TyrusClient extends Endpoint implements Client {
      */
     @Override
     public void dispose() {
-        disposed = true;
+        disposing = true;
 
         resetProxySelector();
 
@@ -307,7 +314,9 @@ public class TyrusClient extends Endpoint implements Client {
 
         this.session.set(session);
 
-        if (disposed) {
+        connecting = false;
+
+        if (disposing) {
             SoapUI.log("WebSocketClient already disposed closing session");
             dispose();
             return;
@@ -333,6 +342,7 @@ public class TyrusClient extends Endpoint implements Client {
                     SoapUI.log("Internal queue overloaded, closing session.");
             }
         });
+
     }
 
     @Override
@@ -342,6 +352,8 @@ public class TyrusClient extends Endpoint implements Client {
         resetProxySelector();
 
         throwable.set(cause);
+
+        connecting = false;
     }
 
     /**
