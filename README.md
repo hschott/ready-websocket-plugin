@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/hschott/ready-websocket-plugin.svg)](https://travis-ci.org/hschott/ready-websocket-plugin)
+[![Latest Release](https://img.shields.io/github/release/hschott/ready-websocket-plugin.svg)](https://github.com/hschott/ready-websocket-plugin/releases/latest)
 
 ## Ready! API Websocket Plugin
 
