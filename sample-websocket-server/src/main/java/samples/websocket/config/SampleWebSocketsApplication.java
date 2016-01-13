@@ -1,12 +1,12 @@
 /*
  * Copyright 2012-2013 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -41,12 +41,13 @@ import samples.websocket.greeting.GreetingWebSocketHandler;
 @EnableWebSocket
 public class SampleWebSocketsApplication extends SpringBootServletInitializer implements WebSocketConfigurer {
 
-    @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(echoWebSocketHandler(), "/echo").withSockJS();
-        registry.addHandler(greetingWebSocketHandler(), "/hello").withSockJS();
-        registry.addHandler(closeWithCodeWebSocketHandler(), "/code").withSockJS();
-        registry.addHandler(randomByteStreamWebSocketHandler(), "/stream").withSockJS();
+    public static void main(String[] args) {
+        SpringApplication.run(SampleWebSocketsApplication.class, args);
+    }
+
+    @Bean
+    public WebSocketHandler closeWithCodeWebSocketHandler() {
+        return new CloseWithCodeWebSocketHandler();
     }
 
     @Override
@@ -54,13 +55,14 @@ public class SampleWebSocketsApplication extends SpringBootServletInitializer im
         return application.sources(SampleWebSocketsApplication.class);
     }
 
-    public static void main(String[] args) {
-        SpringApplication.run(SampleWebSocketsApplication.class, args);
-    }
-
     @Bean
     public EchoService echoService() {
         return new DefaultEchoService(null);
+    }
+
+    @Bean
+    public WebSocketHandler echoWebSocketHandler() {
+        return new EchoWebSocketHandler(echoService());
     }
 
     @Bean
@@ -74,18 +76,16 @@ public class SampleWebSocketsApplication extends SpringBootServletInitializer im
     }
 
     @Bean
-    public WebSocketHandler closeWithCodeWebSocketHandler() {
-        return new CloseWithCodeWebSocketHandler();
-    }
-
-    @Bean
     public WebSocketHandler randomByteStreamWebSocketHandler() {
         return new RandomByteStreamWebSocketHandler();
     }
 
-    @Bean
-    public WebSocketHandler echoWebSocketHandler() {
-        return new EchoWebSocketHandler(echoService());
+    @Override
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(echoWebSocketHandler(), "/echo").setAllowedOrigins("*").withSockJS();
+        registry.addHandler(greetingWebSocketHandler(), "/hello").setAllowedOrigins("*").withSockJS();
+        registry.addHandler(closeWithCodeWebSocketHandler(), "/code").setAllowedOrigins("*").withSockJS();
+        registry.addHandler(randomByteStreamWebSocketHandler(), "/stream").setAllowedOrigins("*").withSockJS();
     }
 
 }
