@@ -54,7 +54,7 @@ import com.google.common.base.Charsets;
 
 @PluginTestStep(typeName = "WebsocketReceiveTestStep", name = "Receive Websocket Message",
         description = "Waits for a Websocket message of a specific topic.",
-        iconPath = "com/smartbear/assets/receive_step.png")
+        iconPath = "com/tsystems/readyapi/plugin/websocket/receive_step.png")
 public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     private final static Logger LOGGER = Logger.getLogger(PluginConfig.LOGGER_NAME);
 
@@ -408,13 +408,13 @@ public class ReceiveTestStep extends ConnectedTestStep implements Assertable {
     }
 
     protected void initIcons() {
-        validStepIcon = UISupport.createImageIcon("com/smartbear/assets/valid_receive_step.png");
-        failedStepIcon = UISupport.createImageIcon("com/smartbear/assets/invalid_receive_step.png");
-        unknownStepIcon = UISupport.createImageIcon("com/smartbear/assets/unknown_receive_step.png");
-        disabledStepIcon = UISupport.createImageIcon("com/smartbear/assets/disabled_receive_step.png");
+        validStepIcon = UISupport.createImageIcon("com/tsystems/readyapi/plugin/websocket/valid_receive_step.png");
+        failedStepIcon = UISupport.createImageIcon("com/tsystems/readyapi/plugin/websocket/invalid_receive_step.png");
+        unknownStepIcon = UISupport.createImageIcon("com/tsystems/readyapi/plugin/websocket/unknown_receive_step.png");
+        disabledStepIcon = UISupport.createImageIcon("com/tsystems/readyapi/plugin/websocket/disabled_receive_step.png");
 
-        iconAnimator = new IconAnimator<ReceiveTestStep>(this, "com/smartbear/assets/receive_step_base.png",
-                "com/smartbear/assets/receive_step.png", 5);
+        iconAnimator = new IconAnimator<ReceiveTestStep>(this, "com/tsystems/readyapi/plugin/websocket/receive_step_base.png",
+                "com/tsystems/readyapi/plugin/websocket/receive_step.png", 5);
     }
 
     @Override

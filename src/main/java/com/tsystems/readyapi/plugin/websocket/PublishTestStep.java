@@ -21,7 +21,7 @@ import com.eviware.soapui.support.xml.XmlObjectConfigurationReader;
 
 @PluginTestStep(typeName = "websocketPublishTestStep", name = "Publish using Websocket",
         description = "Publishes a specified message through websocket protocol.",
-        iconPath = "com/smartbear/assets/publish_step.png")
+        iconPath = "com/tsystems/readyapi/plugin/websocket/publish_step.png")
 public class PublishTestStep extends ConnectedTestStep {
 
     private final static String MESSAGE_KIND_SETTING_NAME = "MessageKind";
@@ -191,11 +191,11 @@ public class PublishTestStep extends ConnectedTestStep {
     }
 
     protected void initIcons() {
-        unknownStepIcon = UISupport.createImageIcon("com/smartbear/assets/unknown_publish_step.png");
-        disabledStepIcon = UISupport.createImageIcon("com/smartbear/assets/disabled_publish_step.png");
+        unknownStepIcon = UISupport.createImageIcon("com/tsystems/readyapi/plugin/websocket/unknown_publish_step.png");
+        disabledStepIcon = UISupport.createImageIcon("com/tsystems/readyapi/plugin/websocket/disabled_publish_step.png");
 
-        iconAnimator = new IconAnimator<PublishTestStep>(this, "com/smartbear/assets/unknown_publish_step.png",
-                "com/smartbear/assets/publish_step.png", 5);
+        iconAnimator = new IconAnimator<PublishTestStep>(this, "com/tsystems/readyapi/plugin/websocket/unknown_publish_step.png",
+                "com/tsystems/readyapi/plugin/websocket/publish_step.png", 5);
     }
 
     @Override

@@ -16,7 +16,7 @@ import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.xml.XmlObjectConfigurationReader;
 
 @PluginTestStep(typeName = "WebsocketDropConnectionTestStep", name = "Drop Websocket Connection",
-        description = "Disconnects from the websocket server", iconPath = "com/smartbear/assets/drop_step.png")
+        description = "Disconnects from the websocket server", iconPath = "com/tsystems/readyapi/plugin/websocket/drop_step.png")
 public class DropConnectionTestStep extends ConnectedTestStep {
     private static final String DROP_METHOD_SETTING_NAME = "DropMethod";
 
@@ -120,11 +120,11 @@ public class DropConnectionTestStep extends ConnectedTestStep {
     }
 
     protected void initIcons() {
-        unknownStepIcon = UISupport.createImageIcon("com/smartbear/assets/unknown_drop_step.png");
-        disabledStepIcon = UISupport.createImageIcon("com/smartbear/assets/disabled_drop_step.png");
+        unknownStepIcon = UISupport.createImageIcon("com/tsystems/readyapi/plugin/websocket/unknown_drop_step.png");
+        disabledStepIcon = UISupport.createImageIcon("com/tsystems/readyapi/plugin/websocket/disabled_drop_step.png");
 
-        iconAnimator = new IconAnimator<DropConnectionTestStep>(this, "com/smartbear/assets/unknown_drop_step.png",
-                "com/smartbear/assets/drop_step.png", 5);
+        iconAnimator = new IconAnimator<DropConnectionTestStep>(this, "com/tsystems/readyapi/plugin/websocket/unknown_drop_step.png",
+                "com/tsystems/readyapi/plugin/websocket/drop_step.png", 5);
     }
 
     @Override

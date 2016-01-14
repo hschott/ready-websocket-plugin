@@ -3,10 +3,11 @@
 
 ## Ready! API Websocket Plugin
 
-This plugin adds three TestSteps to the functional testing in Ready! API
+This plugin adds four TestSteps to the functional testing in Ready! API
 * one for publishing messages to an websocket server
 * one for receiving (and asserting) messages
-* and one for dropping connections
+* one for dropping connections
+* and one for only opening connections
 
 It integrates fully with all other Ready! API features like property expansion, property transfers, data-driven testing, etc.
 
@@ -17,9 +18,9 @@ Thanks to the original authors.
 
 This plugin is compatible and works with:
 * SoapUI 5.2.x
-* Ready! API 1.4.x
+* Ready! API 1.4.x and 1.5.x
 
-If you like to run an unsigned version in SoapUI OS >= 5.2.1 you have to install [SoapUI PluginLoader Jailbreak](https://github.com/hschott/soapui-pluginloader-jailbreak).
+If you like to run an unsigned plugin in SoapUI OS equal to or higher than 5.2.1 you have to install [SoapUI PluginLoader Jailbreak](https://github.com/hschott/soapui-pluginloader-jailbreak).
 
 
 ### Install in SoapUI
@@ -33,11 +34,12 @@ Install the plugin via the Plugin Manager inside Ready! API. Please read [Ready!
 
 ## Websocket Test Steps
 
-This plugin allows publish messages to websocket servers and receive messages from them. It adds 3 new test steps:
+This plugin allows publish messages to websocket servers and receive messages from them. It adds 4 different test steps:
 
 * Publish using Websockets – to publish a message
 * Receive Websockets Message – to receive a message
 * Drop Websocket connection – to close or terminate a connection with websocket server
+* Open Websocket connection – to only open a connection with websocket server
 
 ### Lifetime of Websocket connections
 
@@ -103,7 +105,7 @@ This dialog allows you to manage all connections used for the current project.
 
 ### Publish using Websockets
 
-This test step publishes a message on the selected server. 
+This test step publishes a message on the selected server.
 
 <img width="573" alt="publish message" src="https://cloud.githubusercontent.com/assets/4548589/10111462/813c2c42-63d4-11e5-8b11-104800eb8274.png">
 
@@ -210,5 +212,21 @@ You can choose one of these methods:
 
 * 'Send Protocol Error message' - Send status code `1002` and status reason `drop connection test step` message to the websocket server
  
+
+### Open Websocket Connection
+
+This test step only connects to the websocket server which is useful if you are testing scenarios in which connections should be created before any other none websocket test step.
+
+**Connection**
+
+Choose the websocket server or select `<New Connection…>` to create a new connection for this test step.
+ 
+**Configure**
+
+Click this button if you wish to customize the connection selected for this test step. The 'Configure Connection' dialog will appear.
+
+**Timeout**
+
+The test step will fail if a connection could not be established within a specified period.
 
 

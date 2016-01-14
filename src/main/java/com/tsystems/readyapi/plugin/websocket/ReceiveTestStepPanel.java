@@ -44,8 +44,8 @@ import com.eviware.soapui.support.xml.XmlUtils;
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.Bindings;
 
-public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep> implements AssertionsListener,
-        ExecutionListener {
+public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep>
+        implements AssertionsListener, ExecutionListener {
 
     /** serialVersionUID description. */
     private static final long serialVersionUID = 398715768048748118L;
@@ -73,8 +73,8 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
 
     @Override
     public void afterExecution(ExecutableTestStep testStep, ExecutableTestStepResult executionResult) {
-        logArea.addLine(DateUtil.formatFull(new Date(executionResult.getTimeStamp())) + " - "
-                + executionResult.getOutcome());
+        logArea.addLine(
+                DateUtil.formatFull(new Date(executionResult.getTimeStamp())) + " - " + executionResult.getOutcome());
     }
 
     @Override
@@ -96,7 +96,8 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
         assertionListChanged();
     }
 
-    protected void buildMaxMessagesSpinEdit(SimpleBindingForm form, PresentationModel<ReceiveTestStep> pm, String label) {
+    protected void buildMaxMessagesSpinEdit(SimpleBindingForm form, PresentationModel<ReceiveTestStep> pm,
+            String label) {
         JPanel timeoutPanel = new JPanel();
         timeoutPanel.setLayout(new BoxLayout(timeoutPanel, BoxLayout.X_AXIS));
         JSpinner spinEdit = Utils.createBoundSpinEdit(pm, "maxMessageCount", 0, Integer.MAX_VALUE, 1);
@@ -209,8 +210,8 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
         JButton submitButton = UISupport.createActionButton(startAction, startAction.isEnabled());
         toolBar.add(submitButton);
         submitButton.setMnemonic(KeyEvent.VK_ENTER);
-        toolBar.add(UISupport.createActionButton(startAction.getCorrespondingStopAction(), startAction
-                .getCorrespondingStopAction().isEnabled()));
+        toolBar.add(UISupport.createActionButton(startAction.getCorrespondingStopAction(),
+                startAction.getCorrespondingStopAction().isEnabled()));
         addConnectionActionsToToolbar(toolBar);
         return toolBar;
     }
@@ -222,8 +223,8 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
 
         assertionsPanel = buildAssertionsPanel();
 
-        assertionInspector = new JComponentInspector<JComponent>(assertionsPanel, "Assertions ("
-                + getModelItem().getAssertionCount() + ")", "Assertions for this Message", true);
+        assertionInspector = new JComponentInspector<JComponent>(assertionsPanel,
+                "Assertions (" + getModelItem().getAssertionCount() + ")", "Assertions for this Message", true);
 
         inspectorPanel.addInspector(assertionInspector);
 
@@ -238,8 +239,8 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
 
         add(inspectorPanel.getComponent());
 
-        propertyChange(new PropertyChangeEvent(getModelItem(), "receivedMessage", null, getModelItem()
-                .getReceivedMessage()));
+        propertyChange(
+                new PropertyChangeEvent(getModelItem(), "receivedMessage", null, getModelItem().getReceivedMessage()));
 
     }
 
@@ -289,16 +290,16 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
         Assertable.AssertionStatus status = getModelItem().getAssertionStatus();
         switch (status) {
         case FAILED: {
-            assertionInspector.setIcon(UISupport.createImageIcon("com/smartbear/assets/failed_assertion.png"));
+            assertionInspector.setIcon(UISupport.createImageIcon("/failed_assertion.gif"));
             inspectorPanel.activate(assertionInspector);
             break;
         }
         case UNKNOWN: {
-            assertionInspector.setIcon(UISupport.createImageIcon("com/smartbear/assets/unknown_assertion.png"));
+            assertionInspector.setIcon(UISupport.createImageIcon("/unknown_assertion.png"));
             break;
         }
         case VALID: {
-            assertionInspector.setIcon(UISupport.createImageIcon("com/smartbear/assets/valid_assertion.png"));
+            assertionInspector.setIcon(UISupport.createImageIcon("/valid_assertion.gif"));
             inspectorPanel.deactivate();
             break;
         }
