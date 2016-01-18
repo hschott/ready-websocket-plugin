@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<con:soapui-project id="5e871d76-59b2-469f-8b50-884412b8247e" activeEnvironment="Default environment" name="ready-websocket-plugin" resourceRoot="" soapui-version="6.0.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings><con:setting id="WebSocketConnections"><![CDATA[<xml-fragment>
+<con:soapui-project id="5e871d76-59b2-469f-8b50-884412b8247e" activeEnvironment="Default" name="ready-websocket-plugin" resourceRoot="" soapui-version="5.2.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings><con:setting id="WebSocketConnections"><![CDATA[<xml-fragment>
   <Connection>
     <Name>sample echo</Name>
     <ServerURI>ws://websocket-hschott.rhcloud.com:8000/echo/websocket</ServerURI>
