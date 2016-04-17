@@ -11,7 +11,7 @@
     <groupId>com.tsystems.websocket.server</groupId>
     <artifactId>sample-websocket-server</artifactId>
     <name>WebSocket Sample</name>
-    <version>echo,greeting,stream,code</version>
+    <version>1.0.0</version>
     <packaging>war</packaging>
 
     <properties>
