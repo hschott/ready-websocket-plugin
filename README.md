@@ -17,7 +17,7 @@ Thanks to the original authors.
 ## Requirements and Installation
 
 This plugin is compatible and works with:
-* SoapUI 5.2.x
+* SoapUI 5.2.x and 5.4.x
 * Ready! API 1.4.x and 1.5.x
 
 If you like to run an unsigned plugin in SoapUI OS equal to or higher than 5.2.1 you have to install [SoapUI PluginLoader Jailbreak](https://github.com/hschott/soapui-pluginloader-jailbreak).
