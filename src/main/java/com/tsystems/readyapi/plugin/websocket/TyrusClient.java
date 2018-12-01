@@ -1,7 +1,6 @@
 package com.tsystems.readyapi.plugin.websocket;
 
 import java.io.IOException;
-import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
@@ -31,7 +30,6 @@ import org.glassfish.tyrus.client.auth.Credentials;
 import org.glassfish.tyrus.core.TyrusSession;
 import org.glassfish.tyrus.core.WebSocketException;
 
-import com.btr.proxy.selector.direct.NoProxySelector;
 import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.SoapUISystemProperties;
 import com.eviware.soapui.model.settings.Settings;
@@ -49,8 +47,6 @@ public class TyrusClient extends Endpoint implements Client {
     private ClientEndpointConfig cec;
     private ClientManager client;
     private URI uri;
-    private ProxySelector proxySelector;
-    private boolean proxySelectorWorkaround;
     private volatile boolean disposing = false;
     private volatile boolean connecting = false;
 
@@ -103,7 +99,7 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * 
+     *
      * @see com.tsystems.readyapi.plugin.websocket.Client#cancel()
      */
     @Override
@@ -114,7 +110,7 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * 
+     *
      * @see com.tsystems.readyapi.plugin.websocket.Client#connect(long)
      */
     @Override
@@ -127,8 +123,6 @@ public class TyrusClient extends Endpoint implements Client {
         }
 
         try {
-
-            checkProxySelector();
 
             throwable.set(null);
             future.set(null);
@@ -148,17 +142,8 @@ public class TyrusClient extends Endpoint implements Client {
         }
     }
 
-    // FIXME: workaround https://java.net/jira/browse/TYRUS-412
-    public void checkProxySelector() {
-        proxySelector = ProxySelector.getDefault();
-        if (proxySelector == null) {
-            proxySelectorWorkaround = true;
-            ProxySelector.setDefault(NoProxySelector.getInstance());
-        }
-    }
-
     /**
-     * 
+     *
      * @see com.tsystems.readyapi.plugin.websocket.Client#disconnect(boolean)
      */
     @Override
@@ -174,14 +159,12 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * 
+     *
      * @see com.tsystems.readyapi.plugin.websocket.Client#dispose()
      */
     @Override
     public void dispose() {
         disposing = true;
-
-        resetProxySelector();
 
         Session session;
         if ((session = this.session.get()) != null)
@@ -196,7 +179,7 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * 
+     *
      * @see com.tsystems.readyapi.plugin.websocket.Client#nextMessage(long)
      */
     @Override
@@ -210,7 +193,7 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * 
+     *
      * @see com.tsystems.readyapi.plugin.websocket.Client#getThrowable()
      */
     @Override
@@ -219,7 +202,7 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * 
+     *
      * @see com.tsystems.readyapi.plugin.websocket.Client#isAvailable()
      */
     @Override
@@ -241,7 +224,7 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * 
+     *
      * @see com.tsystems.readyapi.plugin.websocket.Client#isConnected()
      */
     @Override
@@ -254,7 +237,7 @@ public class TyrusClient extends Endpoint implements Client {
     }
 
     /**
-     * 
+     *
      * @see com.tsystems.readyapi.plugin.websocket.Client#isFaulty()
      */
     @Override
@@ -267,8 +250,6 @@ public class TyrusClient extends Endpoint implements Client {
         SoapUI.log("WebSocketClose statusCode=" + closeReason.getCloseCode() + " reason="
                 + closeReason.getReasonPhrase());
         messageQueue.clear();
-
-        resetProxySelector();
 
         this.session.set(null);
 
@@ -300,17 +281,10 @@ public class TyrusClient extends Endpoint implements Client {
         };
     }
 
-    // FIXME: workaround https://java.net/jira/browse/TYRUS-412
-    public void resetProxySelector() {
-        if (proxySelectorWorkaround)
-            ProxySelector.setDefault(proxySelector);
-    }
-
     @Override
     public void onOpen(Session session, EndpointConfig config) {
         SoapUI.log("WebSocketConnect success=" + session.isOpen() + " accepted protocol="
                 + session.getNegotiatedSubprotocol());
-        resetProxySelector();
 
         this.session.set(session);
 
@@ -349,15 +323,13 @@ public class TyrusClient extends Endpoint implements Client {
     public void onError(Session session, Throwable cause) {
         SoapUI.logError(cause, "WebSocketError");
 
-        resetProxySelector();
-
         throwable.set(cause);
 
         connecting = false;
     }
 
     /**
-     * 
+     *
      * @see com.tsystems.readyapi.plugin.websocket.Client#sendMessage(com.tsystems.readyapi.plugin.websocket.Message,long)
      */
     @Override
