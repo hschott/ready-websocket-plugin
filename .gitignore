@@ -14,3 +14,6 @@ dependency-reduced-pom.xml
 buildNumber.properties
 
 test.xml
+
+.mvn/wrapper/maven-wrapper.jar
+
