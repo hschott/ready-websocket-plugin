@@ -1,10 +1,9 @@
-[![Build Status](https://travis-ci.org/hschott/ready-websocket-plugin.svg)](https://travis-ci.org/hschott/ready-websocket-plugin)
 [![Latest Release](https://img.shields.io/github/release/hschott/ready-websocket-plugin.svg)](https://github.com/hschott/ready-websocket-plugin/releases/latest)
 
 ## Ready! API Websocket Plugin
 
 This plugin adds four TestSteps to the functional testing in Ready! API
-* one for publishing messages to an websocket server
+* one for publishing messages to a websocket server
 * one for receiving (and asserting) messages
 * one for dropping connections
 * and one for only opening connections
@@ -16,13 +15,9 @@ Thanks to the original authors.
 
 ## Requirements and Installation
 
-This plugin is compatible and works with:
-* SoapUI 5.2.x and 5.4.x
-* Ready! API 1.4.x and 1.5.x
-* Ready! API 2.4.x and 2.5.x
-
-If you like to run an unsigned plugin in SoapUI OS equal to or higher than 5.2.1 you have to install [SoapUI PluginLoader Jailbreak](https://github.com/hschott/soapui-pluginloader-jailbreak).
-
+This plugin is tested with:
+* SoapUI 5.7.2
+* Ready! API 3.53.0
 
 ### Install in SoapUI
 
@@ -31,11 +26,11 @@ For further question please read [SoapUI Plugin Installation](http://www.soapui.
 
 ### Install in Ready! API
 
-Install the plugin via the Plugin Manager inside Ready! API. Please read [Ready! API Plugin Manager](http://readyapi.smartbear.com/readyapi/plugins/manager/start) for additional informations.
+Install the plugin via the Plugin Manager inside Ready! API. Please read [Ready! API Plugin Manager](http://readyapi.smartbear.com/readyapi/plugins/manager/start) for additional information.
 
 ## Websocket Test Steps
 
-This plugin allows publish messages to websocket servers and receive messages from them. It adds 4 different test steps:
+This plugin allows to publish messages to websocket servers and receive messages from them. It adds 4 different test steps:
 
 * Publish using Websockets – to publish a message
 * Receive Websockets Message – to receive a message
@@ -48,7 +43,7 @@ Websockets are full-duplex (both directions at the same time) single tcp socket 
 
 A TestCase bundles TestSteps and for Websocket TestSteps it is the place where open websocket connections are cached.
 
-Each Websocket TestStep looks into the cache for a named connection. If an open websocket connection could be found it will be used for communication. If no open websocket connection could be found, a new one will be opend and cached. Once the TestCase has ended all open websocket connections will be closed.
+Each Websocket TestStep looks into the cache for a named connection. If an open websocket connection could be found it will be used for communication. If no open websocket connection could be found, a new one will be opened and cached. Once the TestCase has ended all open websocket connections will be closed.
 
 Caching and re-using of open websocket connections only happens when you run a TestCase. When running a single Websocket TestStep it's websocket connection will not be cached for re-use.
 
@@ -77,9 +72,9 @@ This is the URI of the websocket server. Server URI should contain the protocol 
 Server URI may also contain a port number. If the port is not specified, it will default to 80 for ws:// server URIs, and 443 for wss:// server URIs.
 Example of URI: `ws://localhost:80`
 
-**Subprotocols**
+**Sub-protocols**
 
-The optional subprotocols to use in the websocket upgrade request as comma-separated list.
+The optional sub-protocols to use in the websocket upgrade request as comma-separated list.
 
 **Authentication**
 
@@ -140,12 +135,12 @@ This is the actual payload of the message you want to publish.
 
 **Timeout**
 
-The test step will fail if a connection to websocket server is not established and that message could not be send to the server within a specified period.
+The test step will fail if a connection to websocket server is not established and that message could not be sent to the server within a specified period.
 
 
 ### Receive Websocket Message
 
-This test step waits until a message is received from the websocket server and optionaly asserts the message.
+This test step waits until a message is received from the websocket server and optionally asserts the message.
 
 <img width="629" alt="receive message" src="https://cloud.githubusercontent.com/assets/4548589/11326134/30e4175e-9161-11e5-9192-7b2420222714.png">
 
@@ -184,7 +179,7 @@ The payload of a message which was received as a result of the test step executi
 
 **Assertions**
 
-When present, assertions will continuously applied against the received stream of messages. Only if all given assertions match then this test step succeeds.
+When present, assertions will be continuously applied against the received stream of messages. Only if all given assertions match then this test step succeeds.
 
 If no assertion is present then the first received message will be set as valid message.
 

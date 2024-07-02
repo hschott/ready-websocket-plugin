@@ -1,119 +1,130 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-		<modelVersion>4.0.0</modelVersion>
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-		<artifactId>ready-websocket-plugin</artifactId>
-		<groupId>com.tsystems.readyapi.plugin.websocket</groupId>
-		<version>2.0.8</version>
+	<artifactId>ready-websocket-plugin</artifactId>
+	<groupId>com.tsystems.readyapi.plugin.websocket</groupId>
+	<version>2.1.0</version>
 
-		<name>Ready! API Websocket Plugin</name>
-		<description>A Ready! API plugin to run TestSteps against websockets</description>
-		<url>https://github.com/hschott/ready-websocket-plugin</url>
-		<developers>
-			<developer>
-				<name>Holger Balow-Schott</name>
-				<email>Holger.Balow-Schott@bitgrip.de</email>
-				<organizationUrl>https://github.com/hschott/ready-websocket-plugin</organizationUrl>
-				<timezone>+1</timezone>
-			</developer>
-		</developers>
-		<issueManagement>
-			<system>GitHub</system>
-			<url>https://github.com/hschott/ready-websocket-plugin/issues</url>
-		</issueManagement>
-		<licenses>
-			<license>
-				<name>The Apache License, Version 2.0</name>
-				<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			</license>
-		</licenses>
+	<name>Ready! API Websocket Plugin</name>
+	<description>A Ready! API plugin to run TestSteps against websockets</description>
+	<url>https://github.com/hschott/ready-websocket-plugin</url>
+	<developers>
+		<developer>
+			<name>Holger Balow-Schott</name>
+			<organizationUrl>https://github.com/hschott/ready-websocket-plugin</organizationUrl>
+			<timezone>+1</timezone>
+		</developer>
+	</developers>
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/hschott/ready-websocket-plugin/issues</url>
+	</issueManagement>
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
 
-		<repositories>
-				<repository>
-					<id>soapUI Repository</id>
-					<url>http://www.soapui.org/repository/maven2</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-				<repository>
-						<id>central</id>
-						<name>Central Maven2 Repository</name>
-						<url>http://repo1.maven.org/maven2</url>
-				</repository>
-		</repositories>
+	<repositories>
+		<repository>
+			<id>SoapUI_M2</id>
+			<name>SoapUI/ReadyAPI maven</name>
+			<url>https://rapi.tools.ops.smartbear.io/nexus/content/groups/public/</url>
+		</repository>
+	</repositories>
 
-		<scm>
-			<connection>scm:git:git@github.com:hoschott/ready-websocket-plugin.git</connection>
-			<developerConnection>scm:git:git@github.com:hoschott/ready-websocket-plugin.git</developerConnection>
-			<url>https://github.com/hschott/ready-websocket-plugin.git</url>
-			<tag>HEAD</tag>
-		</scm>
+	<scm>
+		<connection>scm:git:git@github.com:hoschott/ready-websocket-plugin.git</connection>
+		<developerConnection>scm:git:git@github.com:hoschott/ready-websocket-plugin.git</developerConnection>
+		<url>https://github.com/hschott/ready-websocket-plugin.git</url>
+		<tag>HEAD</tag>
+	</scm>
 
-		<dependencies>
-				<dependency>
-						<groupId>com.smartbear</groupId>
-						<artifactId>ready-api-ui</artifactId>
-						<version>1.4.0</version>
-						<scope>provided</scope>
-				</dependency>
-				<dependency>
-						<groupId>org.glassfish.tyrus.bundles</groupId>
-						<artifactId>tyrus-standalone-client-jdk</artifactId>
-						<version>1.13.1</version>
-				</dependency>
-		</dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>com.smartbear</groupId>
+			<artifactId>ready-api-soapui-pro</artifactId>
+			<version>3.53.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.lowagie</groupId>
+					<artifactId>itext</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.smartbear</groupId>
+					<artifactId>ready-api-db</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.markusbernhardt</groupId>
+					<artifactId>proxy-vole</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.tyrus.bundles</groupId>
+			<artifactId>tyrus-standalone-client-jdk</artifactId>
+			<version>2.1.5</version>
+		</dependency>
+	</dependencies>
 
-		<properties>
-			<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-			<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
-		</properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
+	</properties>
 
-		<build>
-				<sourceDirectory>src/main/java</sourceDirectory>
+	<build>
+		<sourceDirectory>src/main/java</sourceDirectory>
 
-				<plugins>
-						<plugin>
-								<groupId>org.apache.maven.plugins</groupId>
-								<artifactId>maven-compiler-plugin</artifactId>
-								<version>3.1</version>
-								<configuration>
-										<source>1.7</source>
-										<target>1.7</target>
-										<compilerId>groovy-eclipse-compiler</compilerId>
-								</configuration>
-								<dependencies>
-										<dependency>
-												<groupId>org.codehaus.groovy</groupId>
-												<artifactId>groovy-eclipse-compiler</artifactId>
-												<version>2.8.0-01</version>
-										</dependency>
-										<dependency>
-												<groupId>org.codehaus.groovy</groupId>
-												<artifactId>groovy-eclipse-batch</artifactId>
-												<version>2.1.8-01</version>
-										</dependency>
-								</dependencies>
-						</plugin>
-						<plugin>
-								<artifactId>maven-assembly-plugin</artifactId>
-								<version>2.4</version>
-								<executions>
-										<execution>
-												<id>make-assembly</id>
-												<phase>package</phase>
-												<goals>
-														<goal>single</goal>
-												</goals>
-												<configuration>
-														<descriptors>
-																<descriptor>src/assembly/dist-assembly.xml</descriptor>
-														</descriptors>
-												</configuration>
-										</execution>
-								</executions>
-						</plugin>
-				</plugins>
-		</build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>11</source>
+					<target>11</target>
+					<compilerArgs>
+						<arg>--add-exports</arg>
+						<arg>
+							java.desktop/sun.swing=ALL-UNNAMED,java.security.jgss/sun.security.jgss=ALL-UNNAMED,java.base/sun.net.spi=ALL-UNNAMED,java.desktop/sun.awt=ALL-UNNAMED,java.base/sun.security.x509=ALL-UNNAMED
+						</arg>
+					</compilerArgs>
+					<compilerId>groovy-eclipse-compiler</compilerId>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-eclipse-compiler</artifactId>
+						<version>3.7.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-eclipse-batch</artifactId>
+						<version>3.0.8-01</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/assembly/dist-assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
