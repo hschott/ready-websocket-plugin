@@ -9,6 +9,8 @@ import com.eviware.soapui.support.components.*;
 import com.eviware.soapui.support.log.JLogList;
 import com.eviware.soapui.support.xml.SyntaxEditorUtil;
 import com.eviware.soapui.support.xml.XmlUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializable;
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.Bindings;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -21,6 +23,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.util.Date;
+import java.util.Optional;
 
 public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep>
         implements AssertionsListener, ExecutionListener {
@@ -252,7 +255,8 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
             updateStatusIcon();
         else if (event.getPropertyName().equals("receivedMessage")) {
             String msg = (String) event.getNewValue();
-            if (StringUtils.startsWithCaseInsensitive(msg, "{") && JsonUtil.isValidJson(msg)) {
+            JsonNode json = JsonUtil.getValidJson(msg);
+            if (json != null && json.isContainerNode()) {
                 Utils.showMemo(recMessageMemo, false);
                 jsonEditor.setVisible(true);
                 xmlEditor.setVisible(false);
