@@ -5,7 +5,7 @@ import com.eviware.soapui.plugins.PluginConfiguration;
 import com.eviware.soapui.support.UISupport;
 
 @PluginConfiguration(groupId = "org.hschott.readyapi.plugin.websocket", name = "Websocket Support Plugin",
-        version = "2.1.0", autoDetect = true, description = "Adds Websocket TestSteps to SoapUI",
+        version = "2.1.1", autoDetect = true, description = "Adds Websocket TestSteps to SoapUI",
         infoUrl = "https://github.com/hschott/ready-websocket-plugin/blob/master/README.md")
 public class PluginConfig extends PluginAdapter {
 
