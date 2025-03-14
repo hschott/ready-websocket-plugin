@@ -255,8 +255,7 @@ public class ReceiveTestStepPanel extends ConnectedTestStepPanel<ReceiveTestStep
             updateStatusIcon();
         else if (event.getPropertyName().equals("receivedMessage")) {
             String msg = (String) event.getNewValue();
-            JsonNode json = JsonUtil.getValidJson(msg);
-            if (json != null && json.isContainerNode()) {
+            if (JsonUtil.seemsToBeJson(msg)) {
                 Utils.showMemo(recMessageMemo, false);
                 jsonEditor.setVisible(true);
                 xmlEditor.setVisible(false);
